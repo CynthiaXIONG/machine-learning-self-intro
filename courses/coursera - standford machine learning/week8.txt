@@ -1,0 +1,174 @@
+--- Unsupervised Learning ---
+
+--Clustering--
+. Finds "clusters" in the data
+. Applications: market segmentation, social network analysis, grouping in general
+
+-- K-Means Algorithm -- 
+. most comnun Clustering Algorithm
+. iterative
+    
+    Steps:
+    i. Assign random "Cluster Centroids", as many as the number of clusters desired
+        ii. Iteration:
+            a. -Cluster Assignment Step -> Go through all the data and assign each data to the closest cluster Centroids
+            b. -Move Centroid Step -> Move each centroids to the avarage of the data points that were assigned to that same centroids
+            c. Repeat!!!
+
+            ps: Conversion happens when the data points get assigned to the same centroids on consecutive iterations
+                -> DONE!!!
+
+. Implementation
+    Input:  -K: Number of clusters
+            -X: Training set
+
+    Algorithm:
+    i. Randomly initilize cluster centroids u1,u2,...uk
+    ii. Repeat:
+        a.  for i=1:m
+                c_i = index of cluster centroid closest to x_i
+        b.  for l=1:K
+                u_l = average of points assigned to cluster "l"
+
+        Note: if a cluster has no data points assign -
+            -> Eliminate that cluster
+            -> Or randomly assign a new value to the cluster
+
+    - Optimization Objective -
+        . notation: u_ci = cluster centroid assigned to example "i"
+        
+        -> Cost Function
+            cost J = 1/m * sum_m(sqr_dis(x_i - u_ci))    <- Also called distorsion function
+
+            Obj: min J  
+                -> but the algorithm in a. finds the closest, and in b. finds the u_ci position that minimizes the cost!! -> already optimizes this!!
+                -> Still using the cost/distorsion J function is useful to debug if the algorithm is working properly!!
+    
+    -- Random Initialization --
+        . k < m (makes sense!!)
+
+        -> Very usefull for small number of clusters (where local optima are a problem) 
+            k < 10 ....
+        
+        i. randomly pick "K" traning examples and set the cluster centroids to be equal to those values
+            u = x
+
+        ii. This can resolte in local optimza (where the J funciton is not the lowest possible)
+
+        iii. Runs multiple random initializations and pick the one with lowest cost/distorsion function
+            for i=1:100
+                Randomly initialize k
+                Run K-menas
+                Compute J
+            ;
+            Pick the one with lowest J!!!
+
+    -- Number of Clusters - K --
+    . most comnun is to choose manually
+        . based of data visualization
+        . based on what is the purpose of the clustering!
+
+    . programatic method:
+        - Elbow Method -
+            . Run K-means many times, increasing K each times
+            . Plot the J (distosion func)
+                . It will always be lower when K increases
+                . Choose K to be the "elbow" of the function
+                    -> Where it transitions from fast decline to a slower decline!
+
+
+                NOTE: sometimes the function is a smooth curve where there is no clear "elbow" so choosing K is not easy or valid...
+                    -> This method can work for some problems but usually is not good enough!!!
+
+
+-- Dimensionality Reduction --
+-> Poject the data in a lower dimensional surface and then use that surface instead (reducing dimensionality!!)
+    . Data Compression -> Reduce the feature dimension: Some feature are redundant, proportional or correlated
+        . Simplifies learning model
+        . Increases computing speed
+
+    . Data Visualization -> Help visualize data with multiple dimensional feature space (hard to visualize, to plot...)
+        . Reduce feature space to something we can vizualize (2D or 3D) but that still approximatly represent all the features (so we can see some relations between the data examples)
+
+
+    -- Principal Component Analysis - PCA --
+        . Find the "lower dimensional surface (line, plane, etc)" where to project the data
+            . Surface that has the lower squared distance (projection error) from all points! -> surface defined by 'k' number of vectors (k = n-1) <- linear subspace projection
+
+        - Algorithm -
+            . Preprocess Data:
+                . Feature scaling/Mean Normalization:  (zero mean)
+                    -> X = (x - mean) / std
+
+            i. Compute "covariance matrix - Σ (sigma)":          !!! Σ <- not Sum !!!
+                Σ = (1/m) * sum_n(X*X')     , Σ is n x n
+                        (in Octave: Σ = (1/m) * X' * X;)
+    
+            ii. Compute "eigenvectors" of matrix Σ
+                [U, S, V] = svd(Σ); (in octave)   , svd -> Singular Value Decomposition
+
+                -> U is the only important matrix here
+                    . U is n x n
+                    . u_1, u_2, ..., u_n -> columns of U
+
+            iii. Take the fist "k" vectors of 'u', and those are the vectors that define the subspace surface
+                . U_reduce  is n x k dimn  (in octave: Ureduce = U(:, 1:k);)
+
+                . Z = U_reduce' * X <- (k x 1 dim)
+                    >> Z is the PROJECTION OF X in subspace linear surface !!!
+
+
+        - Recontruscting data from Compressed Data - 
+            . X_approx = U_reduced * Z   (makes sense!!! if line, vector line * distance = point in 2D)
+            . Gives an approximation of the original values
+
+        - How to chose K -
+            . K also known as "Number Of Principal Components"
+            
+            -> Avg_Sqr projection Error:  1/m * Sum_m(sqr_distance(x_i - x_approx_i))
+            -> Total variance in the data: 1/m * Sum_m(length(x_i)^2)    <- how far are data examples from origin/average
+            
+            >>Chose smallest value of K that:
+                avg_sqr_proj_error / total_variance < 0.01  "99% of variance is retained, only 1% of error added due to the compression" <- 99% is a commun value
+
+            - Algorithm -
+                Start with k=1
+                i. Compute Ureduced, Z, X_approx
+                ii. Check if: avg_sqr_proj_error / total_variance < 0.01
+                iii. increase k=k+1 and goto i.3
+
+                -> Not very efficient...
+
+                in [U, S, V] = svd(Σ),   S can be very useful!
+                    -> avg_sqr_proj_error / total_variance = 1 - Sum_k(S) / Sum_n(S) <- We can jump already to this, and test if < 0.01 !!! 
+                                                                                        (or just test if Sum_k(S) / Sum_n(S) > 0.99)
+                -Better Algorithm-
+                i. Compute Sigma
+                    Σ = (1/m) * X' * X;
+                ii. Compute SVD, 
+                    [U, S, V] = svd(Σ);
+                iii. iteratively increase k, and calc to see if variance retained is satisfatory
+                    Sum_k(S) / Sum_n(S) > 0.99  
+                        . if true -> K FOUND!!!
+                        . if not -> k = k+1 and repeat!
+
+
+    -- Speeding Up Supervised Leanring --
+        . Best use for PCA!!!
+        . By reducing features, faster computation (for example in image recognition, each pixel is a feature -> reducing can be very nice (100000 features reduced to 1000))
+        . Usefull for Linear Reg, SVM and Neural Networks!
+
+        -> Only use PCA for the training set (this ouputs U_reduced that enables the mapping X->Z)  
+        -> Use that same U_reduced to do the same mapping for the cv and test sets!! (only apply PCA on the training set)
+
+
+    !!NOTE!! Using PCA DOES NOT PREVENT OVERFITTING 
+        -> it is not the same as reducing the number of features!!!, its just removing ambigues and correlated features
+        -> Use REGULARIZATION instead
+
+    !!NOTE!! - Only use PCA if optimization is necessary    
+                -> Speed up expensive computation
+                -> Decrease memory usage (less features, less data!)
+            Or to visizualize Data (k=2 or 3 though!)
+
+    

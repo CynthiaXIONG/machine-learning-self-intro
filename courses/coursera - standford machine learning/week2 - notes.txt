@@ -1,0 +1,45 @@
+---Linear Regression---
+
+--Multivariate Linear Regression--
+. n - number of features (input variables, x's)
+. x(i) - input features of i'th training example (vector, with n dimension/size)
+. xj(i) - value of feature j in i'th training example (scalar)
+
+. hypothesis: hθ(x) = θ0.x0 + θ1.x1 + ... + θn.xn   -> x0 is always 1 (default to ease matrix operations)
+	-> hθ(x) = θ(T).X      -θ, vector of parameters of n+1 dimension
+
+	->Gradient Descent: θ[j] = θ[j] - α*(1/m)*sum_i=1_to_m((h(x(i)) - y(i)) * x[j](i), for the parameter j -> θ[j] 
+
+--Pratical improvements for faster Gradient Descent--
+-Feature Scaling-
+. Scale some features so they all are on a similar scale, because the learning rate "α" is the same/constant for all features. (e.g. is x1 is in the thousands, and x2 is 0-1...scale x2 to be in the thousands or make x1 a unitary value).
+	. #mean normalization [-0.5, 0.5]#, make features have approx zero mean. (x1 = (x1 - avg_x1) / range_x1)  range = max - min...
+
+-Debugging-
+. plot J(θ) vs nof iterations. It should decrease after each iteration and converge. (a test to see if convergion has been achieve is to check if the decrease has smaller than a very low value, e.g.0.001)
+. if J(θ) no converging, "use smaller α", but remember if α too small, gradient descent can be very slow to converge.
+-Learning Rate-
+. start small, e.g.0.001 and increase by a order of magnitude (e.g. x10) if too slow
+
+---Polynomial Regression---
+. utilize a "polynomial function" instead of a linear one (may fit better the model/data set) on the hypothesis h(θ)
+
+. one possible implementation is adding new feature that is a non linear argument of an existant feature .e.g h(x) = θ0 + θ1*x + θ2*(x^2) + θ3*sqr(x) 
+	. in this case, feature scalling is very important as features will have very different ranges
+
+---Normal Equation---
+. solve for θ analytically, no iteration needed.
+. solve the derivative of the cost function -> dJ(θ) = 0 for the values of θ.
+. θ = inv(X(T).X).X(T).y,  X-> matrix of the features, with x0 being a unitary vector (1,1,1,1,1), that corresponds to the first column of X
+
+--Gradient Descent vs Normal Equation--
+-Gradient Descent-
+. -Need to choose "α"  
+. -Needs iterations...
+. +Works well for very large number of features "n" (n>10000)
+
+-Normal Equation-
+. +No need to choose α
+. +No need to iterate
+. -Slow if "n" is very large (n>10000) because inv(X(T).X) and inverting algorithm is O(n^3)...
+. +In general, for "linear regression", use this one!

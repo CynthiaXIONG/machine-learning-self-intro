@@ -1,0 +1,77 @@
+--- Photo OCR Application Example ---
+
+    -- Photo OCR Pipeline --
+        . Break the problem down into a sequence of operations/modulos
+    0 - Feed image to the Pipeline
+    1 - Text Detection
+        . Detect text in a Photo
+
+    2 - Character Segmentation
+        . From the detected text, segment each Character
+
+    3 - Character Classification
+        . Classifies each character
+
+    ------------------------------
+
+    - Text Detection -
+        -- "Sliding Window" Dectection --
+            i. Train the model with a canvas of fixed aspect ratio (a "window"), that contains or not the object being detected
+            ii. On the bigger image, start by testing a patch/window of that image with the same size as the trained one
+            iii. Move the "window" by some distance -> step-size/stride parameter, and test again
+            iv. Increase the patch size (keeping the same aspect ratio), and repeat iii.  (take the bigger patch, resize to match the trainig size and predict using model)
+
+        -> For text detection:
+            i. Use the Sliding Window Classifier,  
+                . training on patches that contain text and no text (but does not have to be the full text..could be a square containg a letter or parts of a letter/word)
+                . This returns patches of the image where the classifier predicts there is text. But it does not give the area off all the text line (just parts of it together)
+
+            ii. Use an "expansion" Algorithm
+                . Take each of the patches that have positive values (detected) and expandes to the surrounding (depending on if the surronding has posive or negative values)
+
+            iii. Draw bounding boxes around the positives regions (rectangles with text)
+
+            iV. Filter boxes where the aspect ratio is strange (like very thin and tall...probably not text)
+
+            v. Feed this images contained by the BB to the next step of the Pipeline -> Character Segmentation
+    
+    - Character Segmentation -
+        . Use a classfier to identify a split between two characters -> using Sliding Window Dectection again (1D sliding window)
+        . Send output to the Character Classifier!
+
+    ------------------------------------
+
+    -- Generating Artificial Data --
+        . Generating more data for the Character Classification trainig
+            -> Generating new Data from Scratch
+                e.g: Use different fonts and place them over different backgrounds -> generate a lots of traning examples!
+
+            -> Generate data by introducing distortions/variations that represent real life varations (not just random noise variation)
+                e.g: Use image distorsion (blur, wrapping, ) to create new images
+                e.g: for speeach recognition: create variations from the original audio (add background noise, change play speed, add interence)
+
+
+    -> Good Question to ask: "How much work would it be to get 10x more data then we currently have?"
+        . If it is easy, then it is usually a good thing to do!!! More DATA >> Better Model
+            -> Collect more Real Data (sometimes spending a week manually collecting and classifing data can give great results (like collecting 10.000 extra examples!))
+            -> Generate Artificial Data
+            -> use "Crowd Source" for on-demand manual classification (e.g. Amazon Mechanical Turk)
+
+
+    -- What part of the Pipeline to improve/work next? --
+        - Ceiling Analysis -
+            . Estimating the error of each component of the Pipeline
+                . Have a single real value (some metric like Accuracy) for the performance of the whole model
+                i. For each component, starting from the first component of the background replace its output (what it identifies for example) with manual labeled correctly data and then test the same performance of the whole model  (simulatting a particular component working with perfect accuracy, "ceilling" the perfomance of the component)
+                    -> The improvement on the overall performance metric tells you how much can be improved on that particular component (if increases from 80%-90%, improving these component can yeld a 10% overall improvement)
+                ii. Continue and do the same on the second component of the Pipeline (keeping the perfect values of the first component, so we only assess the performance of the second component assuming that there is not error on its input (computed by the first component))
+                iii. And so on.... when all components are replaced with manual output, the overall metric should be perfect (100% accuracy)
+
+
+
+
+
+
+
+
+

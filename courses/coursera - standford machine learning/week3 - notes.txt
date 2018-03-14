@@ -1,0 +1,118 @@
+---Classification---
+. Determine or classify a set of data in some discrete values/categories
+
+- Binary_Classification: only two classes, negative (0) or positive (1)
+	. e_g:Email, spam or not? Tumor, malign or benign?
+
+	. using "Linear Regression", is not good enough (because of discrete values), like h(x) can be ">1" or "<0" even for "0<y<1"
+	. use -> "Logistic Regression", that ensures 0<=h(x)<=1
+
+--Logistic_Regression--
+. goal: 0<=h(x)<=1
+
+. logistic_function: g(z) = 1 / (1 + e^(-z))   (also known as "sigmoid" function)
+. hypothesis: h(x) = g(θ'*X)  <=> 1 / (1 + e^(-θ'*X))
+
+	. h(x) -> estimates probability that "y=1" on input X [p(y=1|x;θ)] (probability expression)
+
+	. in the logistic_function: 
+		- h(x) > 0.5 (or g(z)) when θ'*X > 0 (or  z>0), so it predicts "y=1"
+		- h(x) < 0.5 when θ'*X < 0, so it predicts "y=0"
+
+. decision_boundary: line/delimiter where h(x) = 0.5 (it divides the two regions where its predicted y=1 and y=0)
+	. this boundary is "only" function of the parameters of the hypothesis (θ's) and "not" of the traning set (X's)
+	. can be non-linear (circle, polynomial, etc)
+
+--Cost_Function--
+
+	. the cost function used in linear regression (mean square error), results a non-convex function (lots of local mins) beccause of the non-linear sigmoid function
+
+	. use the "logistic regression cost function"
+
+		Cost(hθ(x),y) = 
+		{
+			-log(hθ(x)) 	if y = 1
+			-log(1-hθ(x)) 	if y = 0
+		}
+		. when h(x) = y, cost = 0
+		. when h(x) = invert y (h(x) = 0 and y = 1 or the oposite), cost = INF
+		#this function is convex!
+
+		Simplified Cost Function (equivalent but all in one expression)
+		"h(x) = -y*log(h(x)) - (1-y)*log(1-h(x))""
+
+--Gradient_Descesnt--
+
+. J(θ) = 1/m * sum_1_to_m(Cost(h(x),y))
+. goal: minimize J(θ)
+. repeat: θj = θj - α * 1/m * sum_1_to_m(h(x)-y).x(j)  => looks identical to linear regression
+. only_change: h(x) = 1 / (1 + e^(-θ'X))
+
+--Advanced_Optimization_Algorithms--
+. more advance algorithms, that are often faster then gradient descent and not need to pick the learning rate (they pick it automatically, picking a better leaning rate and can even change it per iteration):
+ 	. "Conjugate_gradient"
+ 	. "BFGS"
+ 	. "L-BFGS"
+
+ 	-> to use this in Octave, see video of Week3>Advanced Optimization>min7 
+
+--Multiclass_Classification--
+. more than binary classification, e.g: tag emails into categories
+
+One_vs_All(One_vs_Rest):
+. Divide each category into a binary classification (specific category vs all rest) and the result (hθ) is the probability of a certain data being of a certain category
+
+	e.g.: 3 categories, A, B C
+			Binary Logisctic regression of being A (A vs rest), h(θ)1
+			Binary Logisctic regression of being B (B vs rest), h(θ)2
+			Binary Logisctic regression of being C (C vs rest), h(θ)3
+
+	#The prediction for "x" is the max(h(θ)'i')  -> pick the the max from the probability of being A, prob of being B and prob of being C.
+
+---Overfitting---
+. Underfiting: or "High Bias", the function used by the algorithm poorly fits the data (e.g. data follows a quadratic function and linear function is used) 
+
+. Overfitting: or "High Variance", the function used fits the traning set (gives a low Jθ) but it has higher "complexity" then the  (e.g. using and higher polynomyal function), and can fail to predict new values -> fails to generalize
+
+	-> this is caused by having "too many features"
+
+	#solution:
+	. reduce_number_of_feature: manually or using a model selection algorithm eliminate "bad" features (eliminating data might not be the optimal)
+	. regularization: keep all features, but reduce the "weight"/value of parameters θj
+
+--Regularization--
+. penalize the parameters on the cost function, so that they became smaller, and like so, their weight/effect will also be penalized (almost discarded in some cases) -> "simplifing the hypothesis"
+
+. don't known which parameters to reduce/penalize, !so shrink ALL!
+
+. Cost_Function: Jθ = 1/2m * (sum_1_to_m(h(x)-y)^2) + λ*sum_1_to_m(θj^2)) 
+   .λ -> "regularization parameter", controls the "trade-off" between the goal of he "fitting ttraining set well" (reduce the estimation error), avoiding underfitting, and "keeping the hypothesis relativatily simple" (by keeping the parameters small), avoiding overfitting
+
+   . if λ too high -> underfitting. If too low, -> overfitting
+   . #λ does not affect θ0
+
+-Regularized_Gradient_Descesnt-
+. in regularization the first parameter, θ0, is !NOT penalized!
+
+. so, for θ0, use the normal gradient descent algorithm for linear regression, but for the other parameters, use the regularized version (with the regularization parameter, λ)
+
+	θ0 = θ0 - α * 1/m * sum_1_to_m(h(x)-y).x0
+
+	θj = θj - α * (1/m * sum_1_to_m(h(x)-y).xj + λ/m*θj)
+	<=> θj = θj * (1 - α * λ/m) -  α * 1/m * sum_1_to_m(h(x)-y).xj
+
+	(1 - α * λ/m) -> will result of a number slightly smaller than 1 (0.999) and this will function as a reduction factor to θj (shrinking it)
+
+-Regulariazed_Normal_Equation-
+
+	θ = (θ'*X + λ * [identity_matrix_with_(0,0 = 0)])^-1 * X'*y
+
+	identity_matrix_with_(0,0 = 0) = almost_identity_matrix = 	[0 0 0]
+																 0 1 0
+																 0 0 1
+	->note: using a λ > 0, this makes sure that the resulting matrix to invert is always "invertable" -> #another advantage of using regularization
+
+-Regularized_Logistic_Regression-
+. equal to Regularized_Gradient_Descesnt for linear regression, but ofc the hypothesis is different: hθ = 1 / (1 + e ^ (-θ'*X))
+
+. to know how to "use regularization with the advaced optimization algorithms" (in Octave) what week3>SolvingTheProblemOfOverfitting>RegularizedLogisticRegression>min4.30

@@ -1,0 +1,109 @@
+--- Anomaly Detection ---
+. Find anomaly examples on the data set
+. Typical Application: Fraud detection, Manufactoring
+
+    . Train on correct data -> Build model: p(x)
+    . Test some new data.  if p(x_test) < ε  -> flag as anomaly
+
+
+
+- Anomaly Detection vs Supervised Learning -
+    . Why dont just use a supervised learning to classify the data as normal or anomalous??
+        -> Use Anomaly Detection:
+            . Very small number of anomalous examples (positive, y=1), less than 20
+            . Very large number of negative/good examples
+            . Many different types of anomalies. Hard for any algorithm to learn from the positive examples what anomalies look like.
+                Also, new anomalies might look very different from the current ones (out of set data)
+
+        -> Use Supervised Learining:
+            . Large number of both positive and negative 
+            . Enough positive examples for the algorithm to get a sense of what an anomalous example is like.
+                Future positive examples likely to be similar to the ones in the traning set
+    
+
+- Gaussian/Normal Distribution -
+    X ~ N(μ, σ^2)   -> X is distributed by a Normal Distribution   (μ - mean, σ^2 - variance, σ - std)
+
+    p(x; μ, σ^2) = (1/(sqr(2*PI) * σ)) * exp(-(X-μ)^2 / (2 * σ^2))
+
+    ->Parameter estimation:
+        . Estimating μ, σ^2 from a given data set
+            -> μ = (1/m) * sum_i(x_i)
+            -> σ^2 = (1/m) * sum_i((x_i-μ)^2)
+
+-- Algorithm --
+    -Density Estimation-
+       
+        p(x) = the product of the probability of each FEATURE
+            note: ∏ -> product (like sum)
+        p(x) = product_j_n( p(x_j; μ_j, σ_j^2) ) 
+
+    -Implementation-
+    i. Choose feature "x_i" that might be indicative of anomalous examples
+    ii. Fit parameters μ and σ^2
+    iii. Give new example x, and compute p(x)
+    iv. Is an Anomaly if:  p(x) < ε
+
+-- Anomaly Detection System --
+    - Evaluating an Anomaly Detection System -
+        . So we can have some metric about the performance of the system and use this to helps improve it by tweaking the selected features, the ε, etc...
+
+        . Have "labeled" data (y = 0 if normal, y = 1 if anomalous) (like supervised learning!)
+            . Training set: 60%, Only good examples (not anomalous)
+            . CV set: 20%, include few examples with anomalous examples!  ->  
+            . Test set: 20%, same as CV set
+
+        -Evaluation:
+            i. Fit p(x) with traning set
+            ii. On the CV and Test sets, predict y (1 if p(x) < ε (anomaly) | 0 if p(x) >= ε (normal))
+            iii. Use Precision, Recall or F1-Score to measure the performance (week 6-b notes)  (Classification Accuracy not good because the data is very skewed (y=0 for most of the set))
+
+            -> Choosing parameter 'ε': we can use the cross validation set to try different ranges and choose the one with the best metric (like F1-Score)
+
+    - Choosing the Features -
+        . Check if Feature is Gaussain (if its distribution is simlar to the Normal Distribution)
+            -> use an Histogram (hist(x, num_bins) in Ocatave)
+
+            -> If not Gaussian:
+                . Try using the Log(x_i + k) -> could ressemble more of a Gaussian feature (depending on the 'k' value, try different ones)
+                . Try uing x^k -> play with k (less than 1 to have roots)
+                . Check the histogram and if it matches, replace that x with the new transform x_i
+
+        - Error Analysis for Anamoly Detection -
+            -> In Anamoly Detection desired is: 
+                p(x) large for normal examples
+                p(x) small for anomalous examples
+            
+            -> Common Problem:
+                . p(x) is similar for both normal and anomalous examples (both large)
+                    -> add more features so there is a bigger difference/seperation to better distinguish normal and anomalous examples
+        
+        . Choose Features that take on unusually large or small values in the anomalous examples
+            -> You can create features based on relations/ratios of other features: C = A / B or C = A^2 / B
+
+-- Multivariate Gaussian Distributtion --
+    . Normal anomaly detection can fail if there are some relationships between features
+        -> The distribution is always aligned to the axis of the feature (no feature correlation!)
+        -> Solution: Use the Multivariate Gaussian Distributtion
+
+    . Model p(x) all at the same time (not each p_i(x) separatly)
+        ->  p(x; μ, Σ) = google it hehe     -> Σ is the covariance matrix (nxn)!!! (week 8 notes)
+            . This Σ can define covarince and correlation between features!!
+
+    - Implementation -
+        Parameter fitting:
+            . using traning set
+            -> μ = (1/m) * sum_i(x_i)
+            -> Σ = (1/m) * sum_i((x_i-μ)*(x_i-μ)')
+
+!!NOTE!!
+    ->> Multivariate BETTER THAN original model using "density estimation"
+        -> Automatically capture correlation between features (no need to create extra feature that defines a relation between features!)
+        -> But is more expensive to compute...(need to compute an inverse of the Σ matrix (nxn)
+            -> must have m>n so make sure that Σ is invertible! (m > 10n is good)
+        -> note: duplicated features or very redundante features (linearly dependant) can make Σ non-invertible
+
+    -> USE original model if:
+        . traning set (m) is small
+        . need fast computation (simpler, so scales better with a very large number of features (n)!) 
+        . the lack of correlation between features can be solved by manually creating features that correlate existing features (like ratios, etc)

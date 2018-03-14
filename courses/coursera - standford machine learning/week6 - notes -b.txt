@@ -1,0 +1,50 @@
+--- ML System Desing ---
+    - How to improve the accuracy of a model -
+
+        i. Start with simple algorithm. Implement and test on cross-val data
+        ii. Plot learning curves to decide if needs more data, more features, etc... (avoid premature optimizations)
+
+        iii. ->Error Analyses<-
+            . Manually analyse the example where the model made bad predictions -> try to spot a pattern on what type of examples it is making errors
+            . Should analysed the cross-validation set and NOT the test set
+            . Use some Error metric (like J_cv) to compare results
+
+
+    - Error Metrics for Skewed Data -
+        . Skewed Classes -> When the examples from one class are very very rare (99% A, 1% B)
+            -> Hard to analyse the error because a change in the learner model might just classified more types of the most frequent class by chance
+
+            -Precision/Recall- better metrics for Skewed data
+                . y = 1 -> rare classification
+                Precision: number_of_true_positives / predicted_positives    , predicted_positives = false_pos + true_positives
+                Recall: number_of_true_positives / actual_postives,         actual_positives = false_neg + true_positives
+
+            -Trade offs on Prediction vs Recall
+                - Increase Prediction (and decreasing recall): increse threshold of logistic regression, predict 1 if h>0.7 for example  (instead of 0.5)
+                    - Reduce False Positives
+
+                - Increase Recall (decrease prediction): decreae threshold of logistic regression (like 0.3)
+                    - Reduce False Negatives
+
+            -How to compare Precision/Recall results?-
+                . Metrics:
+                    -> Accuracy: (true_positives + true_negatives) / (total examples)
+                    -> F1 Score: 2 * (P * R) / (P + R)
+                       (good because it penalizes the extreme cases where P or R is near 0 (where the normal average could be 0.5 if the other was near 1.0))
+
+                       -> Try to change the value of the "threshold" so it maximazes F1_Score
+
+    -- Data for Machine Learning --
+        . Certain Learning Models perform really well if very large training data sets are provided
+        . Sometimes "The best model is not the one with best algorithm, but the one with the most data"
+
+            -> If "human" can confidently predict Y from the input features X, than
+                >>>More DATA is GOOD!!!
+
+            -> Algorithm with lots of features/hidden units (and low bias, not underfit), providing a very large training set makes sure it will have low variance (so it doesnt overfit)
+                -> using very large data makes model less likely to overfit
+
+
+
+
+            

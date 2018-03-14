@@ -1,0 +1,77 @@
+--- Recommender Systems ---
+    . Movie/Music recomendation based on history
+
+
+    -- Movie Ratings Example --
+        . Notation: n_u = num of users, 
+                    n_m = num of movies, 
+                    r(i, j) = 1 if user j has rated movie i, 
+                    y(i, j) = rating given by user j to movie i
+
+        . Problem: Predict the rating of a movie a user has not rated yet, based on his previously rated movies
+            . Have features about movies (e.g: how much romance/action it has (0-1))
+
+            . Predict rating of movie using Linear Regression for each user:
+            -> Content Based Recommendation/Approach Algorithm (slight deviation of Linear Regression)
+                -> prediction for user j for the rating of the movie i: y(i,j) = (ϴ(j))' * X(i)
+
+                    . m(j) = nof movies rated by user j
+                    . To learn ϴ(j):
+                        min ϴ(j) : 1/2 * sum_i((ϴ(j)' * X(i) ^ 2) + lambda/2 * sum (ϴ_excpt0(j) ^ 2)
+
+                        for all users, do for all users (j's):
+                            min ϴ = sum_j_nu(............................)
+
+                Note: This approach assumes that we have the features about movies that can categorize them very well
+                    -> In Reality this is not true. These features might be impossible to derive...
+
+        -- Collaborative Filtering -- 
+            . Algorithm for FEATURE LEARNING!
+            
+            -> If we can somehow get the values of ϴ(j) for the user (how much they like a particular movie gender/category) then:
+                We can infere the values of the features about how much a movie is of a certain category!
+
+                Solve the equation to try to get the value X (feature vector) instead of the parameters ϴ -> y = (ϴ(j))' * X(i)
+
+                Optimization Algorithm:
+                    Choose values of features X that minimize the cost J
+
+            -Collaboration Filtering-
+                -> Based on Content Based Recommendation (parameter learning):
+                    Given X and Y, estimate ϴ
+                -> Based on the Feature Learning:
+                     Given ϴ and Y, estimate X
+
+                    ϴ -> X -> ϴ -> X -> ....  Collaborative!!
+                Every user rating helps the system learn better features and these improvred features help to predict better movie ratings and so on!
+
+            -Algorithm-
+                Do Parameter and Feature Learning simultaneously, (no need to go back and forth between parameter and feature learning)
+                ->Minimizing X and ϴ together
+
+                J(X, ϴ) = 1/2 * sum_r(i,j)=1((ϴ(j)' * X(i) ^ 2) + lambda/2 * sum(ϴ ^ 2) + lambda/2 * sum(x ^ 2)   
+                -> min_X_ϴ : J
+
+                 NOTE: there is no X0 = 1 and no ϴ_0  (because if the Algorithm wants this, it can learn it by itself)
+
+                i. Initialize X and ϴ to small random values (like NN, to break symmetry breaking. all 0's wont work)
+                ii. Minimize J(X, ϴ), using and optimization algorithm (like gradient descent)  (using the partial derivatives of both X and ϴ)
+                iii. For user with parameters ϴ_j and a movie with (learned) features X_i, predict Y_i,j = (ϴ(j))' * X(i)
+
+
+                -Vectorization Implementation-
+                    -  Low Rank Matrix Factorization -  ( <--- this algorithm is also known as this)
+                        Y = X * ϴ'
+
+                    - Mean Normalization -
+                        For a new user, where there is no movie rated yet, if we dont assign any data before hand, the algorithm will predict 0's for every movie (result of the minimization)
+                        . Pre assign the average rating (based on the other users) to the initial movie ratings... OR:
+                            -> Mean normalize the rows of Y (subtract each movie rating mean rating from each rating)   NOTE: no need to apply feature scalling because all ratings are already on the same scale (0-5)
+                            -> and for each prediction, add the mean: y(i,j) = (ϴ(j))' * X(i) + μ(i)
+                            ->> The algorithm will predivt for non-rated movies the average of its rating (0 + μ(i))
+                        
+                    
+            -Finding Related Movies-
+                . How to find movies "k" related to movie "i":
+                    The difference between features, tell us how different they are...
+                        Find the movies k, with smallest ||X(i) - X(k)||  (|| || -> modulus/distance)

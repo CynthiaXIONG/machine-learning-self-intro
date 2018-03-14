@@ -1,0 +1,95 @@
+--- Support Vector Machine - SVM ---
+. Advanced Supervised Learner
+. Uses a simpler function to calculate the Cost Function (linear instead of logaritmic like in Logistic Regression)
+    -> This function is an linear approximation to the LogReg Cost Function
+        -> Faster to compute! More Optimized
+
+    -Cost Function-
+        (because this is a minization problem, (1/m) elements are removed bc they are a constant)
+        (the regularization parameter is now C and its applied to the first part of J (reducing it)  C = 1/lambda)
+        (note: θ^2 = θ'*θ)
+        -> J(θ) = C * sum(y * Cost_1(θ'*X) + (1-y)*Cost_0(θ'*X)) + 1/2 * sum(θ^2)
+
+    -Hypothesis-
+        Not like LogReg where the output H is the probability of being 1
+        -> H = 1 or 0 (1 if (θ'*X > 0), 0 otherwise)
+
+- Decision Boundary -
+   
+    Boundary Margin -> The distance between the decision boundary "line" and the data set (the bigger the "better" the division is)
+    !!SVM is a Large Margin Classifier!!  (because of:)
+                . For y = 1, J=0 (no error) when θ'*X >= 1
+                . For y = 0, J=0 (no error) when θ'*X <= -1
+
+    MATH: Watch video on Math Behing Largin Margin Classfication (week7) to learn the algebra
+    that makes the decision boundary to be so well spaced (based on the projection of vectors of training examples to θ, and θ is perpendicular to the decision boundary)  -> thus the name SVM
+       -> The minimzation tries to increase the projection sizes (so the distance between training examples and decision boundary is larger)
+        
+
+- Kernels -
+-> used to allow non-linear decision boundaries (non linear models)
+-> Functions used to creature new features that measure the "similarity" between X and a certain "landmark" points(l)! -> k(x, l).
+    Gaussain Kernel:
+        . f1 = new_feature = similarity(x, l) = e ^ (- (modulo(x-l)^2)/(2*ϑ^2)),     if x=l, f1=1, if x far from l, f1 = 0
+    This features measure how close X is from a landmark (l) and make possible to define non-linear decision boundary
+
+    ->each landmark l_i defines a new feature f_i
+
+    ϑ^2 -> is a parameter of the Gaussain Kernel. The bigger ϑ the slower the value of the feature will decay with distance to the landmark
+
+-> Choosing Landmarks
+. Place landmarks at exactly the same location of each traning example!!  -> m number of l
+    . These will measure how close a certain point is to each of the training examples
+
+    . Create vector F with all the features created with the landmarks (add f_0 = 1) -> m+1 elements
+
+    -> Because features are the same order as the training set, it gets very expensive for LARGE TRANNING SETS!!
+        -> That is why SVM uses a lot of numerical (computational) optimizatons, so it can manage all the features
+
+->Note: 
+    Parameter C ("regularization parameter")
+    . Large C: Lower bias, high variance (small lambda)
+    . small C: Higher bias, low variance (large lambda)
+
+    Parameter ϑ^2:
+    . Large: Features F vary more smoothly. Higher bias, low variance
+    . Small: Features F vary less smoothly. Lower bias, high variance  (more variance, underfits less because it can adapt to more things)
+
+-- Using an SVM --
+. use libs to solve the SVM optimization
+
+    Need to specify:
+    . Parameter Choosing.
+    . The Kernal(milarity function)
+        -> No kernel = "linear kernel"  
+            . just gives a standard linear classifier
+            . choose if 'n' large and 'm' small -> large number of features but small traning set (no need to add more complexity and risk overfitting)
+        -> Gaussian
+            . Need to choose ϑ^2
+            . choose if 'n' small and 'm' large (fits non linear, if more complexity is needed and there are enough training sets)
+            . Do feature scalling! (so the "distances" are on the same range for all f's)
+
+
+. Multi-Class Classificaion
+    -> Use one-vs-all Method
+        . Train K SVM's that distiguish each category. Pick class the largest Hypothesis
+
+
+-- Logistic Regresssion vs SVM --
+ -> If 'n' is larger than 'm' (at least 10x)
+    . Use Logistic Regression or SVM with linear kernel (no kernkel)
+
+-> 'n' is small, 'm' is intermediate:  (not with a very large 'm')
+    . Use SVM with Gaussian kernel
+
+-> 'n' is small, 'm' is large (50 000 +)
+    .Very expensive to compute with SVM
+    . Try to increase 'n' and use Logistic Regression or SVM with linear kernel
+
+    .NOTE: Logistic Regression or SVM with linear kernel are very similar
+
+
+->> Neural Network will likely work well for ANY CASE!!!
+
+
+

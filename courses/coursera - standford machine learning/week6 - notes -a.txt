@@ -1,0 +1,81 @@
+--- Evaluating a Learning Algorithm ---
+
+-> Using "Dignostics" test to evaluate a learning algorithm can give a lot of insight on that is/isnt working with a learning algorithm
+    -> It can tell how to best improve it (more features? more traning sets? change regularization parameter?)
+
+--Evaluation--
+    . Split data into "training" and "test" data (70% / 30%)
+        Because the model might likely overfit for the training data, we must use out of sample data to test its generalization
+    . Learn with the training set
+    . Compute test set error (squared error)
+        -for linear -> J = 1/2m * sum_m((H-Y)^2)
+        -for logistic -> J = -1/m * sum_m(Y*log(H) + (1-Y)*log(H))
+
+                ->or use the Misclassification Error (0/1 error) <- better
+                    err = 1 if (H>0.5 and y = 0)  or  (H<0.5 and y = 1) else 0
+                    test_error = 1/m * sum_m(err)
+
+--Model Selection--
+    . Trying out different models (and model configurations like the poly degree) using the same training and test data
+      might not be "fair" as the best model will be probably just overfit for the particular test data (and not the best generalized model)
+
+    -> Use Cross-Validation
+        . Split the data into 3 parts -> Training Set, Cross-Validation Set (CV), Test Set  (60%, 20%, 20%)
+            i.Train of training set
+            ii.Test on the CV set
+            iii.Pick the best model (lowest error) <- fitted for the CV data and not the Test data
+            iv. Test this model with the test data -> Results in a better estimation of the error
+    
+
+--Bias vs Variance--  (Bias -> underfitted | Variance -> overfitted)
+    . High Bias -> High J_train and J_cv
+    . High Variance -> Low J_train and high J_cv
+
+    -Regularization-
+        . Choosing the regularization parameter - λ
+            . Similar as Model Selection, 
+                i.Use models with different λ's
+                ii. Train on the train data, using the "regularized" cost function to get the Thetas
+                iii.Test on the CV data, and pick the model with the lowest error (calc error without regularization)
+                iv.Use this to test the error on the Test Data (calc error without regularization)
+
+    -Learning Curves- Tool to identify High Bias or High Variance
+        . Use different sub-samples of the data with increasing size (using more and more data)
+        . Plot the error VS training set size
+            -Good Model:
+            . For small training set: J_train is very low (easy to fit/overfit the data), and J_cv is very high
+            . For large training set: J_train is bigger (harder to fit all the data), and J_cv is lower than before, getting close to J_train
+
+            -If High Bias-
+            . Small Training set:   J_cv is very high (very underfit)
+                                    J_train is very low 
+            
+            . Large Training set:   J_cv is lower, but still high, stabilizing
+                                    J_train is high and approximate to J_cv (underfits), also stabilizing
+                                    
+                ->Both errors are HIGH, and similar and not changing with increasing training data size
+                ->Getting more training data will NOT HELP
+
+            -If High Variance-
+            . Small Training set:   J_cv is very high
+                                    J_train is very low 
+            
+            . Large Training set:   J_cv is lower, but still high, stabilizing
+                                    J_train increases but still low (overfit)
+                                    
+                ->Large gap/difference between the errors J_cv and J_train, but getting smaller as training data size increases
+                ->Getting more training data will likely HELP
+
+
+    -Summary-
+        WHAT TO DO TO IMPROVE MODEL:
+            -> Getting more trainig examples: only useful if model has high Variance (overfits)
+            -> Trying small sets of features: useful if high Variance (so its doesnt overfits as much)
+            -> Trying to get additional features: usefull to fix High Bias
+            -> changing λ (regularization): fix either high bias or variance (obvious, high_λ -> more underfit, low_λ -> more overfit)
+
+            -Neural Network Overffiting-
+                -> small NN (few parameters and layers): Underfit, but cheaper computation
+                -> larget NN: Overfit. Use regularization(λ) to address overfftting 
+                    . Usually a larget NN with regularization is the best option (but more expensive)
+

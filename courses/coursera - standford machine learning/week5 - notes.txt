@@ -1,0 +1,134 @@
+--- Neural Networks ---
+
+--- Cost Function and Backpropagation---
+
+--Cost_Function-- for neural network classification
+. L -> total number of layers in the network
+. s'l' -> number of units (not counting bias unit) in layer "l"
+. K -> number of output units (K = 1 -> binary classification, K >= 3, multiclass, bc K = 2 is still a binary classification (is A or B, as not(A) = B))
+
+. Cost function is similar to the one used for "Logistic Regression"
+	. But is outputs a "Matrix" with K columns
+	
+- hθ: is a Vector (size K), and hθ(x)'i' = i'th output
+
+- J(θ) = -(1/m) * (sum_i=1_to_m(sum_k=1_K(y(i)'k'*log(hθ(x(i))'k' + (1-y(i)'k')*log(1-(hθ(x(i)))'k')))) - (λ/2m) * sum_l=1_L-1(sum_i=1_sl(sum_j=1_sl+1((θ(l)'j''i')^2)))     
+
+	. On the last term, the regularization parameter, we dont sum the bias units -> i = 0 (similar to logistic regression)
+	. Sum of all the outputs cost function (error) <- sum_k=1_K 
+
+--Backpropagation_Algorightm--
+. algorithm to minimize the Cost_Function -> min J(θ)
+. need to compute:
+	-J(θ)
+	-partial derivative of J(θ) (in regards to l,i,j)
+
+The algorithm itself:
+ i. Set Δ(0) = 0
+ ii. For i = 1 to m:
+ 	0. Set a(1) = X
+	1. Using "forward propagation", calculate the activations of the layers (a2, a3, aL)
+	2. Use the #Backpropagation_Algorightm# to calcultate the "δ(l)'j' the error of node 'j' in layer 'l'":
+	 	a. Use y to compute the error of the ouput layer - δL = aL - y
+	 	b. Use the calcultate error from the preciding layer to calcultate error of the previous layer
+	 	c. There is no error for the input layer, no δ1
+
+		. e.g. error for 	layer 4 (output): 	δ(4) = a(4) - y
+							layer 3:			δ(3) = (θ(3))'*δ(4) .* g'(z(3))     .* <- element wise mult
+
+							g' -> derivative of sigmoid/activation function
+								g'(z(3)) = a(3) .* (1-a(3))
+
+							layer 1 (input): no δ as the input does not have any error...(and we dont want to change them)
+	3. Update the Δ
+		#Vectorized_version# Δ(l) = Δ(l) + δ(l+1)*(a(l)')
+
+	4. Calcultate the partial derivative of J(θ):
+		δ/δθ J(θ) = a(l)'j'* δ(l+1)'j'   -> ignoring regularization, λ = 0
+
+		and its the same as D:  δ/δθ J(θ) = D(l)  (gradient matrices)
+		D(l) = 1/m * Δ(l) + λ*θ(L)  -> j ~= 0   //adding regularization -> also λ/m * θ(L)
+		D(l) = 1/m * Δ(l)   		-> j = 0  (bias)
+
+Octave Implementation Notes:
+- Unrolling_parameters: from matrices into vectors
+	needed because optimization functions take cost functions with tetha as a input "vector" and return gradient as a "vector", but in Neural networks this are matrices
+
+	-> pass everything as a big vector to the learning/optimization algorithms
+
+	. unrolling:
+	thetaVec = [ Theta_1(:); Theta_2(:); Theta_3(:); ] -> unrolls into a "one long vector"
+	dVec = [D1(:); D2(:); D3(:);]
+
+	-> roll back the output vector of the optimiazation algorithms back into the matrices
+
+	. rolling_back: (s1 = 10, s2 = 10, s3 = 1)
+	Theta_1 = reshape(thetaVec(1:110),10,11)  ->Theta_1 is 10x11 elements
+	Theta_2 = reshape(thetaVec(111:220),10,11)
+	Theta_3 = reshape(thetaVec(221:231),1,11)
+
+--Gradient_Checking--
+. way to check if gradient descent or Backpropagation is working without bugs (should be used everytime to check if correct functionality of these algorithms)
+. Caculate an approximation of the gradient (sample J(θ+ε) and J(θ-ε) and get the inclination, m) 
+	-> gradApprox = (J(θ+ε) - J(θ-ε))/ (2 * ε)   -> use low ε, like  ε = 10^-4
+
+	#Implementation for θ with n paramenter:
+	. here, calculate the partial approximation by adding ε to each parameter and calculating the whole J(θ) -> J(θ1+ε, θ2, θn) - J(θ1-ε, θ2, θn)
+
+	using the unrolled version of theta
+	for (i=1:n)
+		theta_plus = theta; //reset theta_plus
+		theta_plus(i) += epsilon;
+		theta_minus = theta; //reset theta_minus
+		theta_minus(i) -= epsilon;
+
+		gradAppox(i) = (J(theta_plus)-J(theta_minus))/(2*epsilon)
+	end;
+
+. Check if "gradApprox = DVec"  (DVec is calculated by the Backpropagation), then I know that the Implementation of Backpropagation should be !correct! 
+
+. Afer making sure the DVec is being correctly calculated, !DISABLE GRADIENTE CHECKING! because it is very expensive (and no need if Backpropagation is correct) and run the learning algorithm
+
+--Random_Initialization--
+. of the θ, the parameters
+	. "zero initialization" for neural networks does not work, as all the hidden units will be computing the same.... (but it works for linear regression)
+
+	. use "random initialization" to perform symmetry breaking (so the hidden layers differ). Usually to values near 0
+		#random values in range [-ε, ε] on Octave:
+			theta_1 = rand(10,11) * (2*init_epsilon) - init_epsilon  //(matrix 10x11)
+
+---Putting_all_Together / Summary---
+
+--training_neural_network--
+i) #Pick a network architecture# (connectivity pattern between neurons)
+	number of inputs, number of hidden layer, and number of hidden units per layer and number of outputs
+	. nof inputs = dimension of features X
+	. nof outputs = number of classes
+	. reasonbable default: "1 hidden layer". if more than 1 hidden layer, default is having "same nof hidden units per layer"
+	. usually the more nof hidden units the better (but gets more computational heavy) -> good default is same to twice the number of inputs
+
+ii) #randomly initialize weights# (to values near 0)
+
+iii) #implement foraward propagation to get hθ(x) for any x#
+
+iv) #implement code to compute cost function Jθ#
+
+v) #implement Backpropagation to compute partial derivatives D#
+	using:
+	for i = 1:m:
+		. perform forward propagation and backpropagation on the "i" example
+		. get activations "a" and delta terms "δ"
+		. Δ(l) = Δ(l) + δ(l+1)*(a(l)')
+		. Compute D
+
+vi) #use gradient checking# to compare D using backpropagation and using the numerical estimate of gradient Jθ
+
+	. if good, disable gradient checking
+
+vii) #use gradient descent or advanced optimization method# with backpropagation (to compute D) to try to minimize Jθ
+
+	. this algorithms are non-convex and can be stuck on a non global minina, buts thats not very importante...results still good
+
+	
+	 	
+

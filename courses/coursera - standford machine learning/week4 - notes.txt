@@ -1,0 +1,50 @@
+---Neural Networks---
+
+--Nonlinear_Hypotheses-
+. Using "logistic regression for a non-linear classification" problem with "many features", if we want to use higher polynomial functions, then the number of features "explodes" exponentially, O(n^(poly_degree) / n)  
+	-> this results in a "very high expensive computional cost" duo to the large feature space....!BAD!
+
+	->solution is to use #Neural Networks
+
+--Neural_Networks_and_the_brain--
+. initially developed as algorithms that tried to mimic the brain
+. uses a model simalar to how the neurons work in the brain
+
+--Model_Presentation--
+. #logistic_unit#: many inputs (x's) that are used to compute an output, h, much like logistic regression
+	. h(x) = 1 / (1 + e^(-θ'*X)) 
+		 it also uses the sigmoid/logistic function, also known as "activation function", g(z)
+
+		 . X is the vector of x's ("inputs"), and the X0 (which is always = 1) is also called the bias unit.
+		 . θ (parameters) are also known as the "weights"
+
+	. a neural network is a group of logistic units that output a single value (contected to each other and group by "layers")
+
+	. "architecture" how the neurons/units are contected to each other (layers configuration)
+
+	. first_layer: the input layer, where the inputs (X) enter the network
+	. final_layer: output layer, a single logistic unit that output the value of the hypothesis, hθ
+	. hidden_layer(s): "a", the logistic units that connect the inputs to the output layer. There can be multiple hidden layers
+
+	. notation -> 	ai(j): "activation" of unit i in layer j -> activation = the valued outputed/computed
+					θ(j): "matrix of weights" controlling the function mapping from layer j to layer j+1 (the next layer). Its dimension is s(j+1) x (s(j) + 1) -> sj = number of units in layer j . The +1 is to take into consideration the bias unit (x0 or a0, always = 1)
+
+	. the output of a unit (a,h) is the activation function (g(z)) of the sum of the inputs (X) multiplied by its corresponding matrix of weights (θ) (linear combination)
+
+. vectorized_implementation: #forward propagation
+	. forward propgation because we calculate the outputs of the units from the previous layer and we propagate this way forward towards the output of the network
+	-> to vectorize the activation calculation, split into two steps
+		i. z(2) = θ(1) * (X or a(1))  //2 - secound layer, 1 - first layer. X could also be reference as a(1)  	-> vectorized
+		ii. a(2) = g(z(2)) //the activation function is the sigmoid function aplied elemental wise to z 		-> element wise
+
+		iii. add a0(2) = 1  (the last step is to add the bias uint to the activation result)
+	. continue this process, propagating forwards the computations of activations of the hidden layer untill the output layer
+
+. #The neural network learnes new ,more complex, features (the hidden layers ones) so it can use more advance features than the inputs (and it learns on its own...)
+
+-Multiclass_classification_with_Neural_Network-
+. its an extension of the one_vs_all method of logistic regression (week2)
+. number of output units is the same as the number of categories -> and its value its the probability of being or not of a specific category category (1_vs_all)
+
+	. "y" will be [0 0 1]  (if it is the category C)
+

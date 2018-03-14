@@ -1,0 +1,121 @@
+--- Large Scale Machine Learning ---
+. Good models are models with low Bias trainied with Lots of data (high variance/overfit when dataset is small)
+    -> Having more data is usually better than having a better model
+
+  -- Gradient Descent on Large Data Sets --
+   (gradient descent is used in LinReg, LogisticReg, NN, etc..)
+    . θ[j] = θ[j] - α*(1/m)*sum_i_m(....)  <- if 'm' is very large, this sumation is very expensive!
+        -> This traditional way of Gradient Descent is also known as:
+            . Batch Gradient Descent
+                . Considering all traning examples at the same time/batch
+                -> Very expensive for very large traning Sets
+                . Also consumes a lot of memory (must load all in disk)
+
+        - Stochastic Gradient Descent -
+            -> Uses only a single example of the traning set per iteration
+            . Define the cost per example
+               cost(θ, x_i, y_i) = 1/2 * (h(x_i) - y_i)^2 
+                J(θ) = 1/m * sum_i_m(cost(θ, x_i, y_i))
+
+            . modify the parameters (traning the model) a little step at a time per traning example
+                . update parameters using only a traning example
+                -> Doesnt converge to the global minimum but wonders very close to it
+
+            . Algorithm:
+                i. Randomly Shuffle the dataset (for better results)
+                ii. Repeat for i = 1:m
+                    θ[j] = θ[j] - α*(h(x_i)-y_i)*X[j]
+                iii. Repeat step ii. for some iterations  (like 10x) to get better convergence
+            
+            Note: After step ii. where all examples have been "looped" the cost (J) is closer to the minima then after an interation of Batch Gradient Descent
+             -> Much Faster!
+
+        - Mini-Batch Gradient Descent -
+            . Compromisse between Batch and Stochastic
+            -> Uses a smaller batch (b = mini-batch size, b=[2-100])
+                . Use 'b' examples per iteration!
+
+            . Algorithm:
+                Divide by "b" instead of dividing by "m"
+                Sum from i=1:b
+                -> Modify the parameters after just "looking" at 'b' examples at a time
+                
+            -> Faster than Stochastic if you pararelize the computation
+                -> Use Vectorization!!!
+            
+            Note: you can create a generic Gradient Descent Algorithm with 'b' as an argument
+                -> b = m -> Batch
+                -> b = 1 -> Stochastic
+                -> else -> Mini-Batch  (b=10 is good value)
+
+            
+        - Stochastic GD Convergence:
+            . Checking for convergence:
+                . In Batch GD, plot J(θ) as a function of the nof iterations
+                    -> Converges if J(θ) decreases per iteration
+
+                -> Stochastic GD:
+                    . Compute cost(θ, x_i, y_i), before updating θ (before it is tranined for that specific example`)
+                    . Every k-iterations (e.g:1000) plot the cost(θ, x_i, y_i) averaged over the last "k" processed examples
+                        -> Converges if this cost decreases (but not necessary per iteation) but with some noise
+                         -> increasing 'k' reduces noise! (but harder to see the real behaviour of the algorithm)
+
+                    -> You can slowly decrease alpha (earning rate) as you are iterating
+                        -> Makes it so it wonders less and less around the global minima (can converge better!)
+                            alpha = k_1 / (iteration_number + k_2)    -> (k_1, k_2 = some constants)
+
+                            Note: not so commun because it adds more complexity to algorithm as you need to tweek k_1 and k_2
+                                -> But can converge better, specially when closing in on the global minima
+                            -> Most Commun is to keep alpha = constant!!!
+        
+    -- Online Learning --
+    -> Learning from a continues stream of increasing data! (like users in a website, and want to do a ongoing learning)
+        . Also a good solution for large data set, where you have such a big stream of new data that you need to save it (as new data is always "coming")
+
+        -> Do like Stochastic GD:
+            . Update θ with: θ[j] = θ[j] - α*(h(x_i)-y_i)*X[j] for a single traning example
+            . discard that example and dont use that example again
+                -> That is why you go one example at a time! (and dont store it, train, discard, fetch next)
+                . Can also do small batches to train and discard
+
+            -> This algorithm can adapt to changing trends in the traning set (with time)
+                . Like changes in the economy makes users buy different things and by countiniously traning on newer examples you can shape your model to fit newer treands
+
+
+            Usages example:
+                -Website Product Search-
+                . Show 10 results depending on the seatch query (e.g: andriod phone, 1080p camera)
+
+                    features, x -> how many words in the user query matches the name of phone and description of it
+                    y = 1 if user clicks on link, y = 0 otherwise
+
+                    learn p(y=1|x;θ) -> probability of user cliking of the phone
+
+                    -> Show the 10 phones with higher 'p'!
+
+                -> After the user chose one of the 10, you get 10 new trainig examples ((x, y) -> where only one has y = 1
+
+                -> Use this new traning examples to "online train" the model!
+
+            -Other Examples: show special offers, product recomendation, etc...
+    
+    -- Map-Reduce and Data Parallelism --
+        . Run on multiple machines/cores due to how huge the data set is
+          -> Good solution for scalling!
+
+        . Each machine computes a mini-batch (a portion of the dataset)
+            i.After each machine computes the partial theta
+            ii. Combine them all on a centralized machine
+                  θj =  θj - alpha*(1/m)*sum(partial_θk)
+            iii. Repeat!
+
+        . Map-Reduce can be used if:
+            -> Learning Algorithms can be expressed as computing "sums" or "products" over the traning set
+
+            Even for the advanced optimization algorithms
+                . They can as input the partial derivates -> which are a "SUM"
+                    -> This sum can be computed in multiple machines -> Map Reduce
+
+        NOTE: Multiple machines or Multiple CPU Cores/GPUs
+            -> Some numerical linear algebra Libs already parellelize vectorizations and other operations and such!
+

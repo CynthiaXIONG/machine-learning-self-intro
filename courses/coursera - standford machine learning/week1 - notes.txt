@@ -1,0 +1,71 @@
+--- Introduction ---
+
+-Supervised learning-
+. its given a data set that the "correct" output is already known (training set)
+	- regression_problem: predict "continuous" valued output
+	- classification_problem: predict "discrete" valued output
+
+-Unsupervised learning-
+. the given data set has no known structure (right/correct output or categories) and the goal is to find structure in that data
+	- clustering_algorithm: identify cluester of that data and grouping/clustering them together
+	- cocktail_party_algorithm: seperate data from a data set (seperate the individual conversations on each person on a cocktail pa rty, where the full data set is all the conversations overlapping)
+
+--Linear Regression with one variable -- //univariable linear regression
+
+notation:
+	. "m" = number of training examples
+	. "x" = feature ("input" variable)
+	. "y" = target ("output" variable)
+	. (x, y) = one training example 
+	. (x(i), y(i)) = "i" training example, index of training set table (row)
+
+goal_of_the_learning_algorithem: given a training set, find the function, "h -> hypothesis", that maps from input to output (estimates an output value)
+
+-hypothesis_h- #hθ(x)
+	. general_form:  hθ(x) = θ0 + θ1.x (linear function where the θs are the "parameters" of this function)
+	. seleting_parameters_θ: goal is to select the θs that "minimize" the difference between the output of the hypothesis and the real ouput value of the training set (use squared difference to get a better representation of the error/difference ) #minimize J(θ)
+
+-cost_function- #J(θ)
+	. measure the accuracy of the hypothesis function
+	. use "mean square error" function (better than plain average, also better derivative...)
+		J(θ0, θ1) = 1/2.m * sum-1-to-m(h(x) - y)^2
+
+	. parameter_learning: use "Gradient Descent" algo to automatically improve the hypothesis function in order to have better accuracy, by minimizing the cost function J(θ)
+
+-gradient_descent-
+	. iterative function to minimize a certain function (min J(θ) -> minimize the cost)
+	. step in the iterations in the "direction" of the variation "slope" (derivative) until a local minimum is found (local derivative = 0).
+	. step_size = learning rate (α)
+	. algorithm: θj = θj - α*(derivative_θj)*J(θ)	<- repeat until converge
+		- for the number of "parameters in θ":
+			i) so simultaneos update: update θ0, 01, 02 to a temp value (temp0 = ...)
+			ii) after all updates, update their values then, θ0 = temp0
+	. learning_rate (α) if "too small needs more iterations" to reach minimum and if "too big can overshoot" the minimum.
+		. as we approach a local minimum, the "setps" will became smaller and smaller because the the "slope" will decrease untill reaching 0. So no need to decrease α over time...
+
+-linear_regression_algorithm- using Gradient Descent
+	. apply gradient descent to minimize cost function (J)
+	. results:
+		for j = 0, θ0 = θ0 - α * (1/m)*sum_i=1_to_m(h(x(i)) - y(i))
+		for j = 1, θ1 = θ1 - α * (1/m)*sum_i=1_to_m((h(x(i)) - y(i)) * x(i))
+	. the cost function (J) for linear regression is always a convex shape, so it has only one minimum so its the optimum/global minimum
+	. this is also called "Batch" Gradient descent because it uses all the traning set (sum from 1 to m)
+
+---Revision Linear Algebra---
+. matrix_dimension: num_of_rows x num_of_columns (4x2)
+	A(i,j) = i row, j 
+. can only add matrixes of the same dimension
+. matrix_matrix_multiplicatin: Amxn x Bnxo = Cmxo,  element i,j of C = row i of A sum(x) column j of B.
+	. "non-comutative" (order matters) and "associative" ((AxB)xC) = Ax(BxC))
+. matrix_vector_multiplication: results in a vector as with num_of_rows = matrix num_of_columns
+. identity_matrix: A.I = I.A = A
+. inverse(-1): the matrix that you multiply to get the indentity. (A.A(-1) = I)
+	. only square matrices have inverse
+. transpose(T): switch rows by columns. Aij = A(T)ji
+
+->for the non-invertible matrixes:
+ 	. may have "redundant features", like size and area, that are linearly dependent, making the matrix non-invertible
+ 	. may have "too many featuers" (n>m)
+ 	. #solution:
+ 		. Delete some featuers or use "regularization" (see later classes)
+ 		. Use "pseudo-inverse" Matrix (pinv function in Octive)

@@ -1,0 +1,63 @@
+The MVIS CryptoCompare Digital Assets 10 Index has closed at 4,064.21 with a gain of 0.36% for the day.
+
+See live index here
+
+Market Update
+
+Yesterday, the cryptocurrency market cap reached a new all-time high of $217.1 billion. At the time of writing, the Bitcoin price is sitting at $7,418 after rising 7.6% in the last 24 hours. More than $850M worth of BTC were exchanged in the BTC/USD market, representing a 25% share of daily volume, second to the JPY at 56%.
+
+
+
+Currently sitting at $323.6, the Ethereum price has dropped 3.5% in the last 24 hours. Over $130M worth of Ether were exchanged in the past 24 hours on the ETH/USD pair which has a 30% market share of the daily trading volume.
+
+
+
+See live charts here and here
+
+ 
+Parity Disable Multi-Sig in the Wake of Bug That Nuked $168 Million Ether
+
+Parity has concluded their report on the bug which enabled an Ethereum hacker to break their multi-sig wallet. The incident permanently locked up over half a million Ether as well as additional tokens, worth at least $168 million in current prices. As a consequence, Parity has temporarily disabled multi-sig functionality.
+
+In “A Postmortem on the Parity Multi-Sig Library Self-Destruct”, Parity expressed remorse for those affected. The team then goes on to ponder what could have been done to prevent the incident, stating:
+
+"If the contract code had not included the functionality to suicide or kill, even if someone had taken ownership, they would not have been able to do anything. The kill functionality was a remainder of the original audited contract."
+Read more here
+
+Monetary Authority of Singapore Publishes Guide to Initial Coin Offerings
+
+The Monetary Authority of Singapore (MAS) has published a guide stating how Initial Coin Offerings (ICOs) will be subject to Singapore’s securities laws. The document clarified that ICOs deemed to be issuing securities in Singapore will fall under the regulatory jurisdiction of the securities laws administered by the MAS. The guide reads:
+
+"The Monetary Authority of Singapore (“MAS”) clarified that if a digital token constitutes a product regulated under the securities laws administered by MAS, the offer or issue of digital tokens must comply with the applicable securities laws."
+Read more here
+
+Founder of Bitstamp Becomes Slovenia’s 6th Richest Person
+
+Damian Merlak, who together with his business partner co-founded Bitstamp in 2011, has just become the 6th richest businessman in Slovenia. The list was published last week by the leading financial magazine. When asked about the cryptocurrency landscape in the country, Merlak stated:
+
+"Cryptocurrencies are a big thing in Slovenia. When I come to Slovenia I usually go mountain hiking and the last time people on the top were talking about Bitcoin. It’s crazy and funny at the same time. I doubt there is any other country in the world that is so crypto aware."
+Read more here
+
+State of the Crypto
+
+Bitcoin is up 7.58% at $7,418.320 with a volume of $118.1k - $849.9M on the USD pairs.
+
+Litecoin is down 3.3% against the dollar for the day at $62.62 and down 9.39% to Ƀ0.008452 on volumes of Ƀ6.0k.
+
+Ether is down 10.31% against Bitcoin at Ƀ0.04359 per Ether and down 3.52% against the dollar to $323.6 with average volume Ƀ24.8k on the ETH/BTC pair.
+
+Dash is down 11.28% at Ƀ0.05592 with Ƀ6.4k volume and down 3.72% against the dollar at $413.97.
+
+Ripple is down 7.52% to Ƀ0.00002792 with volumes of Ƀ3.6k and down 0.05% against the dollar at $0.2075.
+
+Zcash is up 0.98% for the day to Ƀ0.04019 per ZEC and up 9.23% against the dollar to $297.41 with an average volume of Ƀ7.5k for the 24 hour period.
+
+Monero is down 0.29% against the dollar at $122.42 and down 7.24% against Bitcoin at Ƀ0.01653 on volumes of Ƀ3.7k.
+
+Ether Classic is down 11.63% to Ƀ0.002234 with volumes of Ƀ3.5k and down 4.62% against the dollar at $16.52.
+
+Bitcoin Cash is down 24.87% to Ƀ0.1405 with volumes of Ƀ43.0k and down 18.85% against the dollar at $1041.89.
+
+Waves is down 9.63% to Ƀ0.0006631 on Ƀ3.1k volume.
+
+Stratis is down 7.5% to Ƀ0.0004807 on Ƀ1.1k volume.
