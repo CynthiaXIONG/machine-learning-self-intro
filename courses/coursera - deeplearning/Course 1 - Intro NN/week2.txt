@@ -1,0 +1,137 @@
+--- Logistic Regression as Neural Network ---
+
+    -- Notation -- https://d3c33hcgiwev3.cloudfront.net/_106ac679d8102f2bee614cc67e9e5212_deep-learning-notation.pdf?Expires=1512172800&Signature=ADeGJ76I3Wyi1nW4jDZkloe1tqD81RsmU~FsxVWJAxzIM4vmku9~uGXpQSg5phM8OM-WGBYAivsubRmZwsvhdvXn3e5jUYmjDYyPZgACTcWLhNth4bbETnqwZMhGrW7dkaE4KCsY2PA4~KQgfJEaO0I6erRLNm12Wf8mdfEGO-Q_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A
+    x - feature vector
+    y - label
+    i - the 'i-th' training example
+    (x, y)_i - training example pair 'i"
+    m - num of traning exemples
+    n - num of features
+    X - n*m matrix (all x of the training examples)
+    Y = 1xm matrix (all y of the traning examples)
+
+
+    -- Logistic Regression --
+    . Binary Classificaion
+    . Given x, predict y^ ( P(y=1|x) = probablity of y=1) 
+    . goal: 0<=y^<=1 -> y = [0-1]
+        -> Use sigmoid function g(z) = 1 / (1 + e^(-z))  
+            . g(z) = 0.5, for z = 0
+            . g(z) > 0.5, for z > 0 (z = very large positive, g(z) = 1)
+            . g(z) < 0.5, for z < 0 (z = very large negative, g(z) = 0)
+
+            z = w'*x + b
+             -> w = weights (dim=nx1) (parameters..the old [θ_1....θ_n])
+             -> b = bias parameter (dim=1, real number) (the old θ_0=1)
+             -> This notation using separation is easier to use than the old 'θ' notation)
+
+    - Cost Function -
+        . Loss (error) function - L(y^, y):
+            -> using the mean squared error is not good enough because the optimization problem (gradient descent) can converge to local minima
+                . results in a non-convex function (lots of local mins) beccause of the non-linear sigmoid function
+            
+            -> logistic regression cost function (just for a single example):
+                L(y^, y) = -(y*log(y^)) + (1-y)*log(1-y^)
+                    . if y=1, L(y^, y) = -log(y^)  -> (want y^ big)
+                    . if y=0, L(y^, y) = -log(1-y^) -> (want y^ small)
+
+        -Cost Function - J-
+            . Measures the average error off the entire traning set
+
+        J(w,b) = (1/m) * sum_i(L(y^, y)) = -(1/m) * sum_i((y_i*log(y^_i)) + (1-y_i)*log(1-y^_i)) 
+
+        ->goal: find 'w' and 'b' that minimizes J(w,b)
+            . Initialize w and b (to zero for example)
+            . Iteration: Calculate the derivative, and take a "stop" in that diraction
+               
+                w = w - α * (d(J(w, b))/d(w))
+                b = b - α * (d(J(w, b))/d(b))
+                    . α -> alpha, learning rate (negative so you move in the opposite direction of the "slope" -> minimize!)
+                    . d -> derivative (partial)
+
+            . Repeat
+
+    -- Computation Graph --
+        -> https://www.coursera.org/learn/neural-networks-deep-learning/lecture/4WdOY/computation-graph 
+            . very nice visualization of the forward prop and back prop (and derivarion/grad descent) <- must see  (understand the chain propagation!)
+                -> Chain Rule : calc how much changing 'a' affects 'b' (derivative db/da) and because changing 'b' affects the output 'c' (derivative dc/db), chaning 'a' will see a chain of changes that will ultimatly affect 'c' (derivate dc/da)
+                    . dc/da = dc/db * db/da
+
+                    implementation notation: dFinalOutputVar/dSomeVar = dvar  !!!  (same as dc/da from upper example -> only "da")
+
+                    -> this shows why it is useful to go from back to front (because the chain builds from the backwards)
+
+                -->> More on understanding backprop: https://www.youtube.com/watch?v=i94OvYb6noo
+
+    -- Gradient Descent --
+        . After initial forward prop to calc the predicted value (a) and the corresponding error -> Loss, L(a, y)
+            -> a = g(z) (sigmoid)
+            -> z = w'*x + b
+
+        Backward prop to calculate the derivatives in relation to all the variables:
+            da = dL(a,y)/da = -y/a + (1-y)/(1-a)
+            dz = dL(a,y)/dz = a-y
+            dw1 = x1*dz, dw2 = x2*dz, db = dz
+
+            -> Update the parameters (w, b)
+                w1 = w1 - α*dw1
+                w2 = w2 - α*dw2
+                b = b - db
+
+            -> For 'm' examples
+                dw1 = dJ/dw1 =  d/dw1 (J(w,b)) = (1/m) * sum_i(d/dw1 (L(a_i, y_i)))  <- average of the sum of the derivates of all the examples (how on average changing dw1 affects the error!
+
+
+
+--- Vectorization on Python ---
+    . AVOID FOR-LOOPS!!!
+    . use vectoriztion!!! ->>>>> FASTER!!!
+        -> this uses SIMD (single instruction multiple data)
+            dot, .*, .^ ,*, exp, log  are examples of SIMD!
+
+            ->'dot' is matrix mult =D
+            ->A*B is elewise mult
+
+    - Vectorizing Logistic Regression -
+
+        . Forward Prop:
+            i. Z = np.dot(W.T, X) + b   (b is just a number, but python broacast this sum to the whole vector (ele wise))
+            ii. A = sigma(Z)
+
+        . BackProp:
+            . Derivatis computation:
+                0. dZ = A-Y
+                i. dW = np.zeros(n, m)
+                ii. dW = (1/m) * X*dZ.T
+                iii. db = (1/m) * np.sum(dZ)
+                iv. W -= alpha * dW
+                v. B -= alpha * dB
+
+        - Python Broadcasting -
+            https://docs.scipy.org/doc/numpy-1.13.0/user/basics.broadcasting.html
+            . adding or multiplying matrices with non matching vectors, python expands these matrixes so their shapes matching
+            . works with M + r, M * v,  M / v, M1 * M2 (different shapes1), M1 + M2
+
+            M1(m,n) + M2(1,n)  -> transforms M2(m,n) (copies the rows m times)
+
+    -- BE CAREFULL --
+        -> Very easy to add bugs (and overlook a shapes not matching!!)
+
+        -TIPS:
+
+        i. dont use datastructs with shape (x,)  instead (x,1)   (dont use rank 1 arrays!!)
+            eg: a = np.zeros(5, 1)  instead of  b = np.zeros(5)
+                -> because b.T = b (wrong!!!)
+
+
+
+                
+
+
+
+
+
+
+
+
+    

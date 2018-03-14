@@ -1,0 +1,87 @@
+--- Hyperparameter Tunning ---
+
+    . some NN hyperparameters are: learing rate, adam params (beta1, beta2, epsilon), num_of_layers, num_hidden_units, learing_rate_decay, mini-batch decay
+
+    . most important to tune (order): learning_rate > #hidden units, mini-batch size > #layers, learning rate decay > adam params (almost never, std values are good)
+
+    -> Use a "grid search", but dont try all values (too many permutations)
+        . Instead try random values (random samples) for the Hyperparameter configurations
+            -> Coarse to fine sampling: Focus the search on a smaller range of the parameters variation where it performs better, so the search space gets more fine!
+
+        . Scale for the seatch of hyperparameters:
+            . dont sample uniformally at randomm all of the parameters
+                -> use a Log scale  (0.0001, 0.001, 0.01, 0.1, 1, instead of 0.2, 0.4, 0.6, 0.8, 1)
+                    . python: r = -4 * np.random.rand()  [rand uniformly between -4, 0]
+                                learnig_rate = 10^r
+
+                . beta - Hyperparameter for exponentially weighted averages
+                    . if desired range is 0.9-0.999, but be more sensitive to the range where beta is almost 1  (b=0.999, avg over last 1000, b=0.9995, avg over last 2000 values)
+                        python: 1 - 10^r   (use log scale as well)
+
+        . More Tips
+            . re-test hyperparameters ocassionally. Systems/data might have changed (like once a month)
+            . train many models in parallel
+
+    -- Batch Normalization - BN --
+        . normalizing inputs to speed-up learning
+        . normalizing = submtract mean and devide by variance
+
+        -> Normalize by the mean and variance the activations of each layer (batching!!)
+            . Normalize Z instead of A (before the activation) -> usually better. try this as default
+
+            -Implementation-
+                for Z[l](i)_norm (z of unit i of layer l), = (z - mean) / sqrt(std^2 + epsilon)   <-epsilon for numerical stability (dont devide by )0
+
+                Z~ = gamma * Z_norm + Beta   (gamma and beta parameters allows you to customize the mean (beta) and the vau criance(gamma), so its not always 0 mean and unit variance)
+
+                -> This ensures that you can control the mean and variance of the inputs of the activation of the units!
+
+            -> Beta and Gamma:
+                . Are parameters (same dimension as Z (n x 1) 
+                . Use grad descent to update/learn Beta and Gamma:
+                    beta = beta - alpha * d_beta
+                    (or any other optimization algorithm, like adam, etc..)
+
+                . Because of the step on the Normalization where the mean is subtracted, the bias parameter, "b" is nullified (bias is already a constant added to the Z, but as we make the mean equal to zero, the "offset" is removed)
+                    -> We can just eliminate the paramter "b", and only update W, beta and gamma
+
+        - Applying BN to mini-batch GradDescnt - 
+            . normalize just by the values of the minibatch (calc avg and std for the minibatch)
+
+         - Why does BN work? -
+            . If the distribution of the data changes, "covariance shifts", from the data the model was trained,  the model might not be able to perform well (unless if retrained on data with similar distribution)
+            . From the point of view of a hidden layer, its inputs are always changing (because they result from the activation of the previous layer which is being trained)
+                -> This makes the input possibly have "covariance shifts" on everyusing iteration
+                    . By using BN, the distribution changes are much smaller as we make sure the inputs are standerdized, thus making the hidden layer more rubust to changes its inputs! 
+
+            -> It also has a Regularization effect:
+                . on Mini-batch GD, each mini-batch is scaled by the mean/variance computed just on values of that batcj
+                    -> this adds some "noise" to the activation of each hidden layer -> simlar to Dropout (where it adds noise as it multiplies each unit by 0 or 1 depending on the keep_prob)
+                        . This causes some slight regularization effect, as it forces the model not to rely too much on each unit
+                            -> noise is small though, so regularization is small, and it gets even smaller as the mini-batch size increases
+                                . You should still use a convetional regularization method!!
+
+        - How to make predictions, using a model trained with BN -
+            . BN proccess the data each batch at a time, but at test time, you might only predict one example at a time (cant normalize it...)
+
+                i. When training, Calculate an Estimate of the mean and variance:
+                    . using and exponentially weighted average (across the minibatches!, as it is easier and cheaper than calculating the mean and variance for all the traning set)
+
+                ii, At test time, use these estimations to calc the normalizations
+
+    -- QUESTIONS?? --
+        1- How to calc the derivatives of Beta and Gamma?
+        2- How to L2 regularization using BN? penelize Beta and Gamma too? probably not...(like we didnt for the "b" biasdw)
+
+
+        
+
+            
+
+
+
+
+
+
+
+

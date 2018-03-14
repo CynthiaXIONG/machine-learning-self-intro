@@ -1,0 +1,134 @@
+-- Training and Testing on different distributions --
+    . E.g: creating an app for img recognition, you want to test on data that ressembles the app user (manual, blurry cellphone pictures), but its hard to get many traning examples.
+        But you can have a lot more examples for traning from crawlling the web (but this are not the images you want to test on)
+
+        - Dont mix the data and then create a new split for Test/Dev/Set from a random suffle....not good! (not optimzing for the pratical case)
+
+        --Solution:
+            . if you have 100 000 web images and 10 000 mobile images
+                Use 2500 Dev, 2500 Test (from the mobile images) and all the rest 105 000 for traning (important to also have some of the mobile images on the traning!)
+
+                -> Optimizing for the correct target!
+
+    -- Bias and Variance Analysis for Mismatched Train/Dev Data --
+        . Training and Dev error difference can be the result of high variance but can also be like that because the test sets have different distributions
+
+        - Traning-dev Set -
+            . Same dist as the traning set, but not used for traning, and used as a special dev set instead
+            . We can assess now with much higher confidence the Variance of the model
+
+            -> Compare:  Traning Error, Traning-Dev Error, Dev Error
+                . Easy to see if there is high variance problem (if traning-dev errpr is much higher than traning error)
+                . If dev error is mucher higher than traning-dev error (and this is similar to traning error - low variance)
+                    -> Data Mismatch Problem!!
+                . If traning error is already high (than bayes error) -> high avoidable bias problem
+
+            -summary:   -Bayes Error
+                            -> diff: Avoidable bias
+                        -Traning Error
+                            -> diff: Variance
+                        -Training-Dev Error
+                            -> diff: Data Missmatch
+                        -Dev Error
+                            -> diff: Degree of overfitting to the Dev Set (find a bigger Dev set, more examples!)
+                        -Test Error
+
+            . Note: These erros not always increase when moving towards test set (for example if dev/test set is easier to predict than traning data distribution)
+
+        - Data Missmatch Problem Solution -
+            -> Do manual error analysis to better understand difference between traning and dev/test setto makes
+                . Try to make training data more similar to dev/test data
+                    -> through artificial data synthesis
+                        . eg:to if in test/dev images are more blurry, try training data more blurred
+                        note: data synthesis can create data very similar to itself (if the blurred effect is always the same), and the model can overfit to this particular feature if it is present in all synthesised examples (this might be hard to identify for us humans)
+            -> Try to collect more data for the dev/test set
+                . Specifially to address some problematic areas identified through error analysis (addore images of blurred data)
+            
+-- Learning from multiple Tasks --
+
+    -- Transfer Learning --
+     . Learn from one task and use that learning for another task (sequencially)
+        -> Good for quicker training or training with less data
+            i. Train NN on a task (e.g: image recognition) -> Pretrainig the weights of the network (this way a lot of the initial feature learning like identifing curves or outlines is done)
+            ii. After training, replace last output layer with a new output node or mutliple new additional layers, and initialize these last layer weights (but keep the weights of the rest of Network)
+            iii. Retrain!! -> Fine-tuning (fine tune the initial useful features that were pretrained pretrained for the new problem)
+
+        - Use When - 
+            -> there is little data for the problem
+            -> when there is a a Lot of Data for a similar problem A (or more generic problem) and few Data for the actual problem B
+            -> Must have the same input (eg: image or audio clip)
+            -> If low level feature from A could be helpfull for learning B
+
+    -- MultiTask Learning --
+     . Do simultaneous learning on multiple Tasks
+        e.g: autonomous driving detection of: cars, pedestrians, signs, traffic lights, etc..
+
+        -> Have your output Y have the same dimension of all the tasks being learning (e.g: Y [ is_car, is-pedes, ...])
+
+            . Loss function:
+                Loss = 1/m sum_i_m( sum_j_ln( logistic_loss ))
+                 . sum of the loss for each element of output layer, instead of the softmax regression for multiclass classification
+
+            . Even works if the data set is completly labeled (if it was only labeled in relation to one of the outputs for example)
+                . Only sum (sum_j_ln) for examples where the data is labeled!
+
+
+        - Use When -
+            -> training on a Set of taksk that could benefit from a shared lower-level features
+            -> usually the amount of data for each task is similar
+                . if you are trying to recognize 100 diff items and you have 1000 exaamples per item, doing multi-task will enable for the lower-level features learning with 100 000 examples instead -> big boost
+            -> it is possible to train a big enough network to do well on all the Tasks
+                . which should be equivalent to training smaller networks for each task. So for this equivalence, you need a bigger singuluar NN so it can specialize for each task
+
+        Note: Transfer learning is use more communly than multitask learning
+            MultiTask learning is very good for computer vision (where the tasks can be very similar, but these is rare in other areas)
+
+-- End-to-End Deep Learning --
+    . Neural Network that is capable of replacing a pipeline of muliple stages (multiple models) with just one single model
+        .e.g: face recognition: identify person -> identify head -> identify eyes and nose -> id person...... all in one single NN!!
+              speeach recognition: audio -> MFCC features -> phonemes (basic unit of speach sounds) -> words -> transcript
+
+        . requires a lot more Data than the Pipeline hand desinged approach
+
+        . An Intermediate Approach can also be great (have less steps in the pipeline)
+            e.g: face recognition: identify face -> id person
+
+            -> intermediate approach works well when there isnt enough data for the main end-to-end problem, but a lot of data for the intermediate problems 
+
+                .e.g: not a lot of data of from photo of person, ID them..but lots of data of from photo of person recognition face and from image of face, ID person!
+
+    - When to Use -
+        . If there is enough end-to-end Data (inputs and labelled outputs)
+        Pros:
+            . "Lets the data speak" -> the NN (if big enough) will eventually find the best approach/features representation to solve the problem, and not be influenced by the human perseption (like trying to identify sylabels in a sentence...because of our linguistics these might seem to make sense for humans, but its probably not the best approach)
+
+            .  Less hand-desining of components -> saves time and complexity and study/research
+
+        Cons:
+            . May require Large amounts of Data (end-to-end data)
+            . Exclude potentially usefull hand-desinged components -> these manually injection of knowledge can be very usefull if there isnt enough data for model to learn this things
+
+        -> Ideally the model should learn everything from the Data, but if the data is not enough, hand designed knowledge that is manually injected can be very insightful (although these can also hinder and limit the learning!
+
+
+Extra: Autonomous Driving example (system with a pipeline of different algorithms)
+    i. Input image
+    ii. DL model to identify cars and pedestrians
+    iii. Motion Planing model to calculate desired route (for the next seconds)
+    iv. Control model to output the steering values (wheel, acceleration, brakes)
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+         
+
+

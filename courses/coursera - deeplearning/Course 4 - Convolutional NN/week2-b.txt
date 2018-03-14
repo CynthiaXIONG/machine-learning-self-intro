@@ -1,0 +1,99 @@
+--- Pratical Advices for using ConvNets ---
+
+    -- Open-Source Implementation --
+        . Look online for opensource implementation of some papers architecture
+        . Use GITHUB!!!
+        . Get their pre-training data (for transfer learning)
+
+        i. Use architectures of networks published in literature
+        ii. Use open source implementations if possible (where all the hyperparameters are already tuned)
+        iii. Use pretraind models and fine-tune on your dataset (other work might have trained for weeks using mutiple GPUs on millions of images)
+
+    -- Transfer Training --
+        . Download opensource weights that someone else already trainined and use it for pre-training
+
+        . e.g: Cat detector -> Detect if its my cat A, cat B or neither
+                . You only have a small data set...
+            i. Download and online implementation and its trainded weights
+            ii. Get ride of the generic softmax classification (like 1000 objects) and replace with your custom one (cat A, cat B, neither)
+            iii. Only train the parameters for the last softmax layer!!! (freeze the other layers already pretrained)
+                -> some networks have the option to set trainableParameter=0 to freeze training on a specific layers (or freeze=1)
+            iv. Nice trick is to save the activations of the last layer before the softmax, as it will always be the same for a specifc training set (precompute once and then just use value instead of feedforwarding/backwarding every time)
+
+                . You have a large data set...
+            i. Same as before but just freeze fewer layers, and train the last deeper layers instead
+
+            (The more data you have, the more layers you freeze is smaller and the more you train bigger)
+
+            -->> If you have huge amounts of data
+            i. use the Downloaded weights just for initialization and then train the whole network
+
+        . In almost every computer vision task, transfer learning is wonderful!!!!
+
+    -- Data Augmentation --
+        . More Data is always GOOOD!!
+        . Computer vision tasks usually require huge amounts of data!!
+        
+        . Common Augmentaiton methods
+            -> Mirroring
+                . if mirrioring preserves its category 
+                    e.g: mirrior image of car is still a a car (mirroring on the Y axis)
+
+            -> Random Croppping
+                . is not a perfect method because you can crop an important part of the image
+                . usually works just fine as long as the random crops are big enough
+
+            -> Rotation
+            -> Shearing (squish)
+            -> Local warping
+
+            -> Color Shifting
+                . Add distortions to the color channels (like adding +20R, -20G, +20B), following some distribution
+                . Try to simulate different lighting for the image
+                . one way to do it is using PCA Color Augmentation (read AlexNet paper, or google some implentation). makes sure to keep the color identity by using PCA
+            
+        . Implenting distortions during training
+            . Avoid needing a huge hard drive space to save all the variations
+            . Load image, and then the CPU perform the distorsions in parallel (load, distort, save in memory) to be used for training
+            . These distortions varations can be treated as hyperparameters for training the model! (good place to start is to use already tweaked values from others people work)
+
+--- State of Computer Vision ---
+
+    . The the more data you have, the simpler and less hand-engineered the algorithm can be
+    . When data is few, more hand-engineering (hacks) are needed
+        . hand-engineering for features, network architecture, hyperparameters, etc..
+
+    . Currently we still do have enough data for the complexity of the computer vision problems
+        . Current solutions rely more on hand-engineered solutions and rather complex network architectures
+        . Transfer learning very important!
+
+    
+    -- Tips for doing well on benchmarks/winning competitions --
+        -> not realy useful in production...just tips for competitions, where you want 0.5% better performance
+        
+        . Ensembling
+            . Train several networks (3-15 is the typical) independently and average their outputs
+            . Slows down A LOT training time -> very expensive computation wise for what you get
+            . Requires a lot more memory
+        
+        . Multi-crop at test time
+            . Run classifier on multiple versions of test images and average results 
+                -> known method: 10-crop (10 crops..., 5 on a normal image, and 5 more on a y-mirrored)
+            . Also  makes training time slowerrrr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    

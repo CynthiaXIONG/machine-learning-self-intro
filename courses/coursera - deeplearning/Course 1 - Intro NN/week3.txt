@@ -1,0 +1,91 @@
+--- Shallow Neural Network ---
+. Similar to a sucession of Logistic Regression (week2)
+
+    . A[0] = X (input layer)
+    . A[i] = hidden layer "i"
+    . A[k] = output layer
+    -> k = number of layers (dont count the input layer)
+
+    a_i[j](l) - value of the activation of the "i" neuron of the "j" layer, of the traning example (l)
+
+    -Vectorization-
+    Z[1] = W[1]*X + b[1] -> W[1]*A[0] + b[1]
+    A[1] = activation(Z[1])
+    Z[2] = w[2]*A[1] + b[2]
+    .
+    .
+    .
+
+    -- Activation Function --
+    . sigmoid
+    . tanh (similar to tanh): th output is closer to zero, and so it centers the data better for the next layer
+        -> Almost always superior than sigmoid function (for hidden layers), except for binary classification its better to use sigmoid for the output layer!! (just for the output layer)
+        
+        -> For both, if 'z' is very large or very small, the activation function slope/derivative is almost 0, so the steps in gradient descent will be very small
+            -> SLOW!!!
+
+    . ReLU -> Rectified Linear Unit
+        . zero for z<0, linear (slope = 1) from z>0 -> z = max(0, z)
+        . da = 0 (z<0) or 1 (very easy to compute!!!)
+         -> FAST TO compute
+         -> most functions only have z>0, so because the derivaite is constante and much greater than 0 (no slow down) -> Faster
+         -> because derivite is 0 for negative 'z', its is very slow and could not converge at all (edge cases)
+
+    . Leaky ReLU: z = max(0.01z, z)
+        -> the derivative for z<0 is positive, but very small (da = 0.01)
+
+    NOTE: Use 'sigmoid' for the output layer (if using binary classification) and for the rest use 'tanh' or even better the 'ReLU' (or even better the 'leaky ReLU') !
+
+        - Why we need non-linear Activation Functions -
+            . Using linear (identity) actication functions (g(z) = z), the result of multiple linear hidden layers can always be replaced by a model with just one layer (logistic regression) 
+                -> multiple linear layers can be represented by a single layer, its expressiveness is the same!
+
+    -- Gradient Descent --
+        - Derivatives of Activation Functions -
+            -> Sigmoid: dg(z) = g(z) * (1 - g(z))
+            -> Tanh: dg(z) = 1 - (tanh(z))^2
+            -> ReLU:  dg(z) = 0 if (z<0) or = 1 if (z>0)
+            -> Leaky ReLU: dg(z) = 0.01 if (z<0) or = 1 if (z>0)
+
+         - Implementation -
+            . W[i] dims =  n[i] x n[i-1]
+
+            . Const function: J = (1/m) * sum_i(L(y_pred, y))
+
+            .Repeat:
+                i. Compute predictions
+                ii. calc derivatives, dW, dB
+                iii. update parameters: W -= alpha * dW, B -= alpha * dB
+
+
+            . Derivatives:
+                dZ[k] = A[k] - Y
+                dW[k] = (1/m) * dZ[k] * A[k-1].T
+                dB[k] = (1/m) * np.sum(dZ[k], axis = 1, keepDims=True)
+
+                dZ[k-1] = (W[k].T * dZ[k]) .* g[k-1](z[k-1])      (.* = element wise mult!)
+                dW[k-1] = (1/m) * dZ[k-1] * A[k].T
+                dB[k-1] = (1/m) * np.sum(dZ[k-1], axis = 1, keepDims=True)
+                .
+                ..
+                ...
+
+                Note: W and dW always have the same dimension (and the same for all other vars, the derivate keeps the dimensions)
+
+    -- Random Parameter Initialization --
+        . MUST INITIALIZE THEM RANDOMLY!!!  -> Need to break symmetry!
+         -> Initializing to Zeros WILL NOT WORK!
+
+            . if you initialize them to zeros, the hidden unites in a layer will all have the same activation value will get the same derivative. (they will be the same, and compute the same)
+                You will get identical units in your layers -> Symmetry, even after updating with gradient descent (bc grads will be the same), that will compute the same (so it is the same as having just one unit!!)
+
+        -> W = np.random.rand(shape(n, m)) * 0.01 
+            -> multiply by small value is good, so you avoid getting very large values for 'z' and more likely to get on the flat part (slow gradient, slower convergence) of the sigmoid/tanh activation function 
+        -> b = np.zeros(shape(n, 1))  -> zero is fine for the Bias Unit
+
+
+
+
+
+
+ 

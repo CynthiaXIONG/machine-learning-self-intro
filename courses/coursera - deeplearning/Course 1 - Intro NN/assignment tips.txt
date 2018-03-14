@@ -1,0 +1,13 @@
+--Numpy--
+np.reshape -> https://docs.scipy.org/doc/numpy-dev/reference/generated/numpy.reshape.html#numpy.reshape
+    . One shape dimension can be -1. In this case, the value is inferred from the length of the array and remaining dimensions.
+        A trick when you want to flatten a matrix X of shape (a,b,c,d) to a matrix X_flatten of shape (b ∗∗ c ∗∗ d, a) is to use:
+            X_flatten = X.reshape(-1, X.shape[0]).T
+
+-Jupyer-
+    -Download the assgnigment-
+        In the Jupyter notebook, use the "+" button to insert a new cell. In the cell type:
+        !tar cvfz notebook.tar.gz *
+        Execute the cell with Shift-Enter.
+        Go to File -> Open...
+        You will see the file notebook.tar.gz, click on the filename to download.

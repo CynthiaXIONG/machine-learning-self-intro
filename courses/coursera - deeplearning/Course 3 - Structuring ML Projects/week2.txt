@@ -1,0 +1,40 @@
+--- Error Analysis ---
+
+-> Evaluate examples from the Dev set where the model failed (errored)
+    -> Trying to Identify areas where model fails (e.g: if cat classifier misclassifies Dog images)
+        i. Get ~100 mislabeled dev set examples
+        ii. Count how many are of dogs (manually)
+            - This way you can have an estimate of how much you can improve your model by trying to fix that area (the dog problem)
+        
+    -> Evaluating ideas in parallel:
+        . create a table and do error analysis for each.
+            .eg: i) Fix dogs being recognized as cats, ii) fix great cats (lions, tigers) being misrecognized, iii) improve performance on blurry images
+            . Count the occurances of this erros on mislabeld examples of your dev set, and check its percentage.
+                -> This can help to chose which idea has the best potential to improve your model
+
+            . You might get new ideas while analysing the mislabeled examples
+
+-> Incorrect Labeled Data (in the traning set...human error)
+    . If errors are random...DL algorithms are robust enough to not overfit this erros.
+        -> no need to clean up this Incorrect Data
+
+    . If errors are systematic -> can/will influence your model!!
+        -> Clean up / fix the incorrect Data
+
+    -> You can also count this errors caused by mislabed data (model recognized correctly but data was mislabeled, so it was flagged as an error).
+        if this is a big fraction of your total errors, then you should clean up your atleast your dev set data (so you can analyses the other "real" error better)
+
+    !Note: Remember that goal of dev set is to help you select between two classifiers A and being
+
+        - Correcting/Cleaning Dev/Test Set examples - 
+         . Apply same process to your Dev and Test set (so their distribution is the same)
+         . Also consider examples your algorithm got right (and not just wrong occurances) - this can be hard if your model has high accuracy...
+         . As it is less important to correct the data in the traning set (if the erros are random), your train and the corrected dev/test distribuion will come from slightly different distribuion, and that is OKAY!!!
+
+-- Building new systems tips (and do error analsys right away, from the start) --
+    -> Build system quickly and iterate
+        i. Setup dev/test set and metric
+        ii. Build initial system quickly
+        iii. Use Bias/Variance analysis and Error Analysis to prioritize next steps
+        iv. Iterate!!
+

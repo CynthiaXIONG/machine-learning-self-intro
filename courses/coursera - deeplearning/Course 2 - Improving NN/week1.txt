@@ -1,0 +1,143 @@
+-- Train/Dev/Test Sets --
+
+Data -> Training Set, Development Set (cross validations set), Test Set
+    . Tain on train set, try out different hyperparameters and models on the Dev set and finally test it unbiasly on the Test set
+
+    60%/20%/20% split!
+
+    But on big data (like 1 000 000):
+        Use a much higher percentage for traning, and small for dev/test (like 10,000 is enough)
+        ->> 98%/1%/1%, or even 99.5%/.4%/.1%/
+
+    -> Make sure the Dev and Test sets comes from the same Distribution of data.
+        . But for the traning set, you can use others sources just to increase the data set!
+
+    -> Not having a Test set, could be okay (you might get some overfitting to the Dev set though)
+
+    Note: Bayes Error -> Erro a Human would have on a certain task!
+
+-- Bias and Variance --
+    . High Bias:
+        . Underfitted
+        . Train Set Error: High
+        . Dev Set Error: also high, similar to train set error
+        -> Solution:
+            . Add more complexity: bigger network, different archytecture, more grad descent iterations, more input features
+
+    . High Variance:
+        . Overfitting
+        . Train Set Error: very low
+        . Dev Set Error: higher than Train set error
+         -> Solution:
+            . More data or increase regularization (also trying different NN architecture can help)
+
+    -> Its possible to have High Bias and High Variance simultaneously! (very bad Model though)
+
+--- Regularization ---
+    -- L2 regularization --  -> squared ecledian norm of W
+        . L2reg = (λ/2m) * ||W||^2   
+            . λ -> regularization parameter  <- chosen empirically (using cross validation)
+        -> W will be sparsed (lots of zeros, so some features will be nulified)
+        -> Only regularize W. b is not needed...(??, remember X0 from ML course..not used in regularization...)
+        . Most commun
+
+        Forbenius norm = L2 norm (squared sum of all elements)
+
+        dW = (.....) + (λ/m)*W 
+
+        -> Also known as "Weight Decay" -> regularization makes W smaller!!
+
+
+    - Why does it reduce overfitting? -
+        . Because the cost function is penalized by the value of the Weights itself, minimazation will try to set W to a low value
+            . high λ will force W to be very smaller, close to zero
+            -> close to zero W, will make the effect of same features/units almost null, thus reducing overfitting.
+                . The ones to be reduceded the most will be the ones that have the least effect on the output! (because of backprop/gradient descent!)
+                . Also, if λ high, W and thus Z is low, so the non linear activation functions will have a small Z, where they have an almost linear behaviour
+                    -> linear activation units can be composed by just on linear(simple) unit, this removing complexity and decreasing overfitting of the model!
+
+        
+    -  Implementation -
+        remember to add the regularization factor to the cost function and dW
+
+    ->> L2 Regularization is the most common regularization method
+
+
+    -- Dropout Regularization --
+        . For each unit, base on a random probability, eliminiate or not that unit
+            . Repeat this and see if you get a nice result
+
+        - Implementation - 
+            . Inverted Dropout
+
+                d_i = droupout vector for layer_i = np.random.rand(a_i.shape[0], a_i.shape[1]) < keep_prob   
+                    -> keep_prob is an hyperparameter...example 0.8
+
+                a_i = np.multiply(a_i, d_i)  (zeroing out the corresponding values of d_i)
+                a_i /= keep_prob     -> scale back the activations so it does not change the excepted value magnitude (the excepted value is the same!)
+
+                -> Train: Do this per iteration of grad descent (zeroing out different weights!)
+                -> Test: Dont use dropout!
+            
+        -> it works because unit cannot rely on any one feature, so it has to spread out weights -> shriking them in general!
+        -> you can adjust the keep_prob per layer, and having high values on layers with few parameters (or even 1.0) and a low value on layers with many units (which might cause the overfitting)!
+        
+        ->> Mostly used in computer vision, where there are a lot of features and units
+        . Because the Cost function, J, changes every iteration, you cant plot it as it might increase..(but the code still working)
+
+
+    -- Other Methods to Decrese Overfitting --
+        - Data Augmentation - Add more data
+            . generate more traning examples (like the inverted of a picture, or crop/distorse)
+
+        - Early Stopping -
+            . By plotting the train error and the dev set error. Maybe there will be a section where the errors are minimal and then start to increase (deve set error). Stop here
+            . Not very good..better to use L2 regularization and just train more and more!!!
+
+            
+
+--- Optimizing ---
+
+    -- Normalizing Inputs --
+        . Acelerate gradient descent, by having a more normalized cost function (grad descent converges faster)
+
+        -> subtract mean, so the mean is zero, x = x - mean
+        -> normalize variance, x = x / (std^2)    <- std^2 = (1/m) * sum(x^2)
+
+        !NOTE:use the same mean and std to normalize the test data (normalize with the same values, both train and test/dev set)
+
+
+    -- Vanishing/Exploding Gradients --
+        . On a very deep net, on the first iterations, because the weights will not be tuned, the values of y_pred can be exponentially big (if bigger than 1) or exponentially small (if smaller than 1).
+
+        -> Solution: Better Weight Initialization:
+            . The larger 'n', the smaller W you want (because Z is the sum of W)
+
+                . W[l] = np.random.rand(shape) * np.sqrt(2/n_[l-1])   <- scale with the variance (with ReLU!!)
+                                                                        . for tanh, var = sqrt(1/n[l-1])  is better
+
+--- Gradient Checking ---
+    -> Check if gradients are being correctly calculated by comparing with the numerical gradient
+        numerical_grad = (J(theta + epsilon) - J(theta - epsilon)) / (2 * epsilon)
+
+    -- Implementation --
+        0. epsilon = 10^-7
+        i. reshape W_0, b_0, etc... into big vector theta
+        ii. reshape dW, db the same way d_theta
+
+        iii. compute J(tetha)
+            loop for each theta parameters
+                d_tetha_approx[i] = J(theta_0, .., theta_i+epsilon) -  J(theta_0, .., theta_i-epsilon) / (2*epsilon)
+
+        iv. check if they are the same (distance):  ||d_theta_approx - d_theta) ||^2 / (||d_theta_approx|| + ||d_theta||)
+            . If this returns value in the similar order of the epsilon, like 10^-7, then its good!!  (10^-3 is not good enough for example!!! probably there is a bug in the grad calculation)
+
+    NOTE: Only use this to debug, as it is VERY VERY SLOW!!
+        -> Include Regularization!
+            . It does not work with dropout regularization
+
+    
+
+
+
+    

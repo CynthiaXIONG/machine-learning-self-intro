@@ -1,0 +1,195 @@
+--- CONVNets Use Cases ---
+
+    --- Classic Networks Architecturs ---
+
+        -- LeNet-5 --
+            . Goal: handwritten recognition
+            . oldish, 1998
+                -used average pooling instead of max
+                -used sigmoid/tanh for activation function instead of ReLU
+            
+            . Architecture:
+                i.      input: 32x32x1
+                ii.     CONV1: f=5x5, s=1, nc=6  -> out=28x28x6
+                iii     POOL1: average, f=2 s=2  -> out=14x14x6
+                iv.     CONV2: f=5x5, s=1, nc=16 -> out=10x10x16
+                v.      POOL2: average, f=2, s=2 -> out=5x5x16
+                vi.     FC3: input=400x1, out=120x1
+                vii.    FC4: input=120x1, out=84x1
+                viii.   OUT: softmax 10 (10 numbers)
+
+            . Not a very deep Network
+                . 60k parameters
+                . As we go deeper in the network:
+                    -n_h, n_w decreases
+                    -n_c increases
+            
+            . pattern on the layers: conv -> pool -> conv -> pool -> fc -> fc -> output
+
+        -- AlexNet --
+            . Goal: 1000 object classifier
+
+            . Architecture:
+                i.      input: 227x227x3
+                ii.     CONV1: f=11x11, s=4, nc=96 -> out=55x55x96
+                iii.    POOL1: max, f=3x3, s=2 -> out=27x27x96
+                iv.     CONV2: same conv, f=5x5, nc=256 -> out=27x27x256
+                v.      POOL2: max, f=3x3, s=2 -> out=13x13x256
+                vi.     CONV3: same, f=3x3, nc=384 -> out=13x13x384
+                vii.    CONV4: same, f=3x3, nc=384 -> out=13x13x384
+                viii.   CONV5: same, f=3x3, nc=256 ->out=13x13x256
+                ix.     POOL6: max, f=3x3, s=2 ->out=6x6x256
+                x.      FC6: in=9216, out=4096
+                xi.     FC7: in=4096, out=4096
+                xii.    OUT: softmax 1000
+
+            . Similar to LeNet-5, but much bigger
+                . 60M parameters
+                . needed way more data as well
+                . used ReLU activation functions
+
+            . Original papper was imlemented using:
+                . Multiple GPUS (those GPUs were slower than now)
+                . Local Response Normalization (LRN) -> not very used nowadays
+                    . optimization that doesnt work that well....
+            
+        -- VGG-16 --
+            . Goal: similar to AlexNet, but uses simpler network (BUT DEEPER) with following pattern:
+                CONV: same, f=3x3, s=1     POOL: max, f=2x2, s=2  (halfs the image size)
+
+            . Architecture:
+                i.      input: 224x224x3
+                ii.     2xCONV 64 + MAXPOOL
+                    iia.    CONV1A (64): out=224x224x64   (64 <- num of filters)
+                    iib.    CONV1B (64): out=224x224x64
+                    iic     POOL1      : out=112x112x64
+                iii.    2xCONV 128  + MAXPOOL -> out=56x56x128
+                iv.     3xCONV 256 + MAXPOOL -> out=28x28x256
+                v.      3xCONV 512 + MAXPOOL -> out=14x14x512
+                vi.     3xCONV 512 + MAXPOOL -> out=7x7x512
+                vii.    FC 4096
+                viii.   FC 4096
+                xi.     OUT: softmax 1000
+
+            . 16 layers with parameters
+                . 138M parameters (very big!!)
+                . filters (n_c) get doubled after every "CONV" step
+                . image sie gets halved after every "step"
+
+    --- ResNet ---
+        . Used to train Very Very DEEP Networks
+            . where the problem of vanishing and exploding paramters exists as you go deeper
+        
+        . In theory, the deeper the network the lower the training error gets
+            -> This does not happen in reality, duo to the parameters issue (harder to train)...so after some num of layers, error starts to increase
+            -> Residual Nets try to solve this (and achieves this!! up to 1000s layers!)
+        
+        . Uses Skip Connections
+            -> take actvation of a layer and connect/feed it to a much deeper layer
+
+        - Residual Block -
+            . on a "block" of two sequential/typical layers where a[l] is feeded as input
+                . a[l] -> linear (z[l+1] = W[l+1] a[l] + b[l+1]) -> ReLU (a[l+1]=g(z[l+1])) -> linear (z[l+2]) -> ReLU (a[l+2])
+
+                -> Now, add a "shortcut/skip connection", feeding a[l] to the last ReLU for a[l+2]
+                    a[l+2] = g(z[l+2] + a[l])
+
+            -> This Residual blocks allow the training of much deeper Networks
+
+        - Why they work?? -
+            . output of Relu is always  >= 0, so g(a[l]) = a[l] (RelU of a[l] is the same a[l])
+            -> because of the fact above, it is very easy for the network to lean the "identity" function for the W[l+2] in order to cancel the new layers l+1, l+2 
+               a[l+2] = g(z[l+2] + a[l]) = g(W[l+2] a[l+1] + b[l+2]  + a[l])   -> if w[l+2] = 0, a[l+2] = a[l]
+
+               -> So it does not hurt the Network to add this new couple of layers (residual block), as the network can easily learn to discard them if needed, but if it actually learn something useful, then it can only improve the performance of the model
+
+                . On a "plain" regular network, it can be very hard for a layer to learn the identity function (just copy the input to the output, when the input is already a good feature!!)
+
+            . Note: the residual block requires same dimensions on the 2 layers, so use SAME convolutions
+
+                -> if different dimensions, you can use a zero padding transformation, so its matches 
+
+                -> on the POOL layers, where dimensions are changed use the zero padding adjustemnt bewteen the input layer of the residual conv block and the output layer
+
+        - Typical ResNet Architecture -
+
+            Sequences of these patter:
+                3x Residual blocks of 2xCONV nets  (total 6CONV)
+                1x POOL layer
+                ...
+                ...
+                softmax
+    
+    -- 1x1 Convulutions -> Networks in Networks --
+        . The convolution operation is performed on one "pixel", but through out all the channels. So its as if we were fully connecting each pixel and its channes (similar to features) to and output of some other features (the number of output channels of the convolution)
+            -> Network in a network, where each pixel is a "traning example"...
+
+        . It can be used to shrink the number of channels (while keeping the image size), similar to how pooling shrink image size
+            28x28x192 -> CONV 1x1 32-> 28x28x32
+
+        . Very useful for the Inception Network
+
+    -- Inception Network --
+        . Goal: Let model choose what is the best layer config by computing many different layer operations in one step
+
+        . Stack up different outputs into one single output (using padding to achive same dimensions on the outputs) -> Inception Layer!
+            . e.g: Stack up a 1x1 Conv 64 + 3x3 same conv 128 + 5x5 same conv 32 + max pool (here needs same padding...strange case for pooling)
+                    -> output would have n_c = 64+128+32+128   <- Channel Concat
+
+        -> The model will choose which channels to use, 1x1, 3x3, max pool, so easier than trying to choose the perfect next layer architecture (have them all and let the model learn the best)
+            -> Very heavy computational cost !!!
+                . because the inception layer output will have a very high number channels, and if you want to use convolute thay layer, the number of parameters and of multiplications will be very very high
+
+                . Solution:
+                    Use a 1x1 Conv to reduce the number of channels of the ouput of the inception layer (e.g: from 192 to 16) -> Bottleneck Layer!
+                        . This lets the model pick which channels/'features' are the most importante, and filter out the rest in order to improve training speed and memory
+        
+        - Inception Model / GoogLeNet -
+            e.g:
+                i. previous activation => Input 28x28x192
+
+                ii. parallel layers
+                    iia. 1x1 Conv 64 -> 28x28x64
+                    iia. 1x1 Conv 96 -> 3x3 Conv 128 -> 28x28x128
+                    iia. 1x1 Conv 16 -> 5x5 Conv 32 -> 28x28x32
+                    iia. MaxPool 3x3, s=1 (same) -> 28x28x192 -> 1x1 Conv 32 -> 28x28x32  (reduce pooling layer otherwise the inception layer output would be heavily influenced by this)
+
+                iii. Do the Channel Concat (stack up) -> 28x28x256
+
+                iv. 1x1 Conv to reduce channels OR maxpool to change (reduce usually) image dim
+        
+            -> Repeat/Stack the inception model consecutively on the network
+
+        Note: To prevent overfitting and ADD some REGULARIZATION to the inception network:
+            - Make some branches of some intermediate inception models have a FC -> softmax output that tries to predict
+                . This way we ensure that the middle layers are already trying and somewhat good at making the prediction
+                . (see Incepction Network clip, min 5.00 or see GoogLeNet)
+
+        
+
+
+                
+
+
+
+
+
+            
+
+            
+
+        
+
+
+
+            
+
+
+            
+             . 
+
+                
+
+
+
+

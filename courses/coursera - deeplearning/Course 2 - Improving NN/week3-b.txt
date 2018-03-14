@@ -1,0 +1,26 @@
+--- Mult-class Classification ---
+
+    -- Softmax Regression --
+    . C = num_of_classes
+    . each unit of the output layer is the probably of being of that category
+    . output, y_pred is of dim Cx1, and all probablities sum to should sum to 1.0
+
+        - Activation of the output layer -
+            . t = e ^ Z    <- exponentiation
+            . a_i = t_i / sum_c(t_j)   <- normalize, so you get the propotional
+
+                . this normalization unsures the sum off all a's will be 1.0
+
+            . dZ[L] = y_pred - y   (derivative of the last layer, for backprop)
+
+        - Loss Function -
+            L = -sum_c(y*log(y_pred))
+
+--- Deep Learning Frameworks ---
+    . not pratical to implement everything from scratch -> Use a framework!!
+
+    -- TensorFlow --
+     . just need to provide the feed forward computational graph (and the cost function) and it will do backprop and use an optimizer
+     
+
+

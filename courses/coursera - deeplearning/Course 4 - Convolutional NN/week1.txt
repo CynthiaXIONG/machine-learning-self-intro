@@ -1,0 +1,145 @@
+--- Convolutional Neural Network ---
+
+-- Computer Vision problem --
+    Convolution is used for "edege detection"
+
+ -- Convolution -- 
+    
+    . '*' is the operator
+    . 'tf.nn.conv2d' is the function for this operation 
+    . 6x6mat (image, nxn) * 3x3mat (filter, fxf) = 4*4 mat (output, dim is n-f+1)
+        . output mat [0, 0]  is the sum of element wise product of first 3x3sub matrix of the image with the filter mat
+        . output mat [1. 0] is that initial sub matrix, shifted one element to the "right"
+        . ....
+
+    -> Use NN to learn the best 3x3mat filters (as 9 parameters) that can better detect features of your image!!!
+
+    - Padding -
+        . Avoid the shrinkage cause by the convolution operation  (for deep NN can be a big problem!!)
+        . Pixels at the edges can be used down to only one time for the output calculation....(its influence could be very low)
+
+        -> Add padding to the input image, with an adition (1x1px for 3x3 filters) padding - 'p'
+
+    . "Valid" Convolution: no padding, output shrinkes f-1
+    . "Same" Convolution: padding so output size is same as input!  (2p = f-1 -> p = (f-1)/2  , p dim of padding, f dim of filter)
+    NOTE: 'f' should be ODD!! (otherwise padding gets assimetric and there will be no "center" pixel....)
+
+    - Strided Convolution -
+        . Stride -> How much you "step" each new convolution - 's'
+        . Output dim: floor(((n+2p-f) / s) + 1)
+
+    !NOTE!: convolution is also called cross-correlation (no filter flipping) in math/signal processing
+
+    - Convolution over Volumes -
+        . images coded in RGB (matrix), require 3D filter (e.g: 4x4x3)
+            . output is 2D
+            . filter usually has all the image channels (RGBA), but could only be applied to one of the channels
+
+        - Multiple Filters - 
+            . Use convolution with multiple filters at the same time
+            . Stack the output, stacking each in a new dimension...output could be 4x4 x2 (for 2 diff filters)
+            . Detect multiple features at the same time, where the ouput will have one dim (depth/channels dim) with size equal to num of features
+
+    -- One Layer Convolutional Network --
+        . After the convultion, you get an output W.A  (filter is W, A is input of previous layer)
+            . Add an real number bias, b, and do a non linear function (activation function, like ReLU),  A' = ReLU(W.A+b)
+
+            -> for layer 'l':
+                . f[l] = filter size
+                . p[l] = padding
+                . s[l] = Stride
+                . nc[l] = num of filters
+                . Input dim = n[l-1] x n[l-1] x nc[l-1]  (nc, num of channels)
+                . Output dim = n[l] x n[l] x nc[l] 
+                                n[l] = floor((n[l-1]+2p[l]-f[l])/s[l] + 1)
+
+                . Filter dim = f[l] x f[x] x nc[l-1]
+                . Activation dim: A[l] = m x n[l] x n[l] x nc[l]
+                . Weights dim: all filters = f[l] x f[x] x nc[l-1] x nc[l]
+                . Bias dim: nc[l] 
+        
+        . Flatten the last layer into a vector (e.g:7x7x40 = 1960x1) and do a logistic softmax for a classification exercise (cat or no cat =D)
+
+        . Typically as you go deeper into the layers, you shrink the output size but increase its number of channels (e.g:39x39x3->37x37x10->17x17x20->7x7x40) 
+
+    -- Types of Layers (more commun) --
+        - Convolution - CONV - is the ConvNet layers just described untill now
+        - Pooling - POOL
+        - Fully connected - FC
+
+    -- Pooling Layers (POOL) --
+        . almost like CONV but appliyng a different operation instead of the convolutional operation (*)
+        . Reduce/condense size, while trying to keep main features information
+           - Max Pooling (select the max from the filter) -
+                - Max pooling does is to reduce the image size, but keeping the information of a feature if present in that filter (high number is kept), or if not there is just reduced
+                - No parameters to learn
+                - hyperparameters are the same as CONV layer (f, s)
+                - Output has the same number of channels as the input (the computation is done per channel) (f[l] x f[l] x nc[l])
+
+            - Other used is: Average Pooling (but max pooling is more used)
+            
+            - Hyperparameter:
+                .Filter size
+                .Stride
+                .Padding (rarely rarely used...)
+                .Max or Average pooling
+
+            ! NO parameters to learn !
+
+        NOTE: usually POOL layers are not "counted" as a layer, as it has no weights. CONV + POOL is one layer!
+
+    -- Fully Connected Layers (FC) --
+        . Connecting a flattend layer to another 1d layers (where all the units are connected, like a standard DNN)
+
+    -- Examplet of CNN -- (based on LeNet-5 for handwritten recognition)
+        .input: 32x32x3
+        .layer1: CONV 1: f=5, s=1 n_f=6, -> 28x28x6
+        .layer1: POOL 1: f=2, s=2, maxpool -> 14x14x6
+        .layer2: CONV 2: f=5, s=1 n_f=16, -> 10x10x16
+        .layer2: POOL 2: f=2, s=2, maxpool -> 5x5x16
+        .flatten: 400x1
+        .layer3: FC3: n=120 -> W(120,400) -> 120x1
+        .layer4: FC4: n=84 -> 84x1
+        .softmax output: 10x1
+
+        -> Base your CNN configuration and hyperparameters on literature and other successful CNN 
+        -> CONV layer followed by POOL layer is common configuration
+        -> usually as you go deeper
+            width and height decrease
+            number of channels increase
+            FC layers at the end
+
+    -- Why Convolutions are good? (compared to regualar FC DNN) --
+        . parameters are way less then when connecting first layers when the input is an image and very large dim size (32x32x3 -> 28x28x6 if fuly connected would be 14M parameters, vs 156 of the CONV layer)
+    
+            -> Parameter Sharing
+                A feature detector that is useful (e.g: edge detector) in one part of the image is probably usefu; in another part of the image
+
+            -> Sparsity of Connections
+                In each layer, each output value depends only on (is "connected to") a small number of inputs (filter)
+
+            
+
+
+
+
+            
+        
+
+
+
+
+
+
+
+
+
+    
+
+        
+
+
+
+        
+
+

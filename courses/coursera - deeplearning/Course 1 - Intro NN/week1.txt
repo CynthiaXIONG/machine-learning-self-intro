@@ -1,0 +1,35 @@
+--- Neural Networks ---
+see coursera machine learning week4 and week5 notes beforehand
+    -> Majority of the applications of NN and DL are supervised learning
+        e.g: online adversiting (stdNN), computer vision (CNN), speech recognition (RNN), machine translation (EN->PT) (RNN), Autonomous driving (stdNN and CNN -> hybridNN)
+
+        . stdNN: Standart Neural Network (inputs, few hidden layers, output)
+        . CNN: Convolutional NN
+        . RNN: Recusive NN (used when there is a sequence /temporal data )
+
+    --ReLU--
+    . Rectified Linear Unit: 
+        . Activation Function of a neuron
+        -> is linear but has a minimum value (0 usually)
+        -> looks like this: _/
+        -> similar to function of SVM
+
+    . Structured data
+        ->Each feature has a well defined meaning (like size, #beds)
+        ->Databases
+
+    . Unstructured data
+        -> Audio, Images, Text (frequency, pixels, characters)
+
+
+    -> Deep Learning (NN) vs Traditional Supervised Learners (SVM, LinReg, LogReg)
+        . Traditional methods don't improve with very large amounts of data
+        . DL are able to learn much more (the more it is able learn the bigger the NN has to be) with huge amounts of data
+
+         -> Need very large amounts of data (labeled data, m)
+         -> Need computational power to train a large/deep NN
+            -> Need better hardware
+            -> Need better algorithms to run faster.
+                Changing from a sigmoid activation to a ReLU makes big improvements in the performance
+
+        . Faster computational also enables faster iteration time when developing a NN (train and test faster!)

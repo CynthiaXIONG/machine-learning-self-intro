@@ -1,0 +1,82 @@
+--- ML Strategy ---
+
+-- How to Improve ML System (increase accuracy)-- 
+    . Collect more data
+    . Collect more diverse trainig Strategy
+    . Train algorithm longer
+    . Try algorithm optimizations (like Adam)
+    . Try droupout or L2 regularization
+    . Change Network Architecture:
+        Number of layers
+        # hidden units
+        Activation functions
+        ...
+
+    - How to know which "actions" will have a more positive effect before actually trying them?
+    
+-- Orthogonalization --
+    . How to tune hyperparameters?
+        . First make sure model Fit training set well! (bigger network, better optimization (Adam, etc) -> decrease underfitting)
+        . Then, that it fits well the ved set and then the test set! (regularization, bigger training set -> decrease overfitting)
+    
+    . Tune an hyperparameter or try one of the things above to improve accuracy, one at a time! (orthogonal, only changing one variable/dimension at a time)
+
+-- Setting up Goal --
+    - Single Numeric evaluation Number -
+        . Use this value as the benchmark to improve your model (and only this value..so it is easier to see if you are making process)
+            . Instead of using two metrics (like Precision and Recall), use instead F1Score (which combines precision and recall, doing its harmonic mean)
+            -> Use F1Score!!!
+
+        - Optimizing and Satisficing Metric -
+            . Maximize just ONE metric (like accuracy, or F1Score)
+            . Satisficing another metrics (just needs to be less than to be reasonable. e.g: prediction execution time)
+                - pick all the other metrics you care about but there the value just need to be satisfactory (like less or bigger than) and not maximize!
+        
+        - These metrics must be calculated on the training/dev/test sets!
+    
+    - Train/Dev/Test set Distributions -
+        . Try to make Dev and Test set from same distribution (if you have data from different sources, use a random shuffle of both Dev and Test set, ...not exclusively...)
+            . And try to test on Data that you want to use your model on!!
+
+        - Set Size -
+            . dont use the old 60%/20%/20% (was okay for small data sets, but not for modern traning sets with millions of examples)
+            . 98%/1%/1% 
+
+            . Test Set Size: big enough so you can have confidence on the model. No need to be huge and better to use more data to train!
+
+    . NOTE: You can define a custom evaluation metric that gives more important to some custom thing (like when calculating error of image recognition, give an higher error value if the classifier missclassifies pornographic images as cats)
+
+-- Human Level Performance --
+    - Bayes Optimal Error: best possible theoretical error, to map X->Y!
+        . Good goal is to surpass human-level performance and then get close to the Bayes Error level
+        . Usually progress slows down alot after suprassing human level performance.
+            - Because human level performance is already close to Bayes error
+            - Also because you usually train in data labeled by humans, so surpassing it is hard if you train with that....
+
+    . Difference between Bayes error and Training Error -> Avoidable Bias (because you can in theory avoid and reduce it until you reach Bayes level)
+    . Difference between Training Error and Dev Errot -> Variance
+
+    - Human Level Performance - Definition -
+        . we can use Human-level error as a proxy/approximation for Bayes error (if it is a task that humans excel at, like image recognition)
+
+
+    - Surpassing Human-Level Perfomance -
+        Possible!!!!
+        e.g: Online Ads, Product Recommendations, Loan approvals  <- Structured Data problems
+            -> Made Possible because of the access of huge amounts of data (that analyses more data than any human can analyse...)
+
+-- Improving Model Performance --
+    - Two assumptions of supervised learning:
+        1. You can fit the trainnig set pretty well (reducing avoidable bias)
+            - Train bigger mode
+            - Train longer or use better optimization algorithm (adam)
+            - Find better NN architecture/hyperparameter (activation function, etc)
+        2. Traning set performance generalizes pretty well to the dev and test data (reducing variance)
+            - Get more data
+            - Regularization (L2, dropout, data augmentation)
+            - better NN architecture/hyperparameters
+    
+
+
+
+

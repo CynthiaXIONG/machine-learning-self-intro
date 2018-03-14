@@ -1,0 +1,116 @@
+--- Opttimization Algorithms ---
+
+-- Mini-Batch Gradient Descent --
+    Process the trainig set by smaller (mini) batches at a time
+    -> Enable upating parameters/weights faster, because we dont have to iterate all examples
+    -> Enable parallel computing
+    -> Does not have to load all the data at once (use less memory)
+
+    
+
+    - Implementation -
+    for num_iterations
+        for (num of batches)
+                (in each iteration just use m_i = batch_trainig_examples)
+            forward_prop
+            compute cost
+            back_prop
+            update_params
+
+        -> 1 epoch (1 iteration through all the data), grad descent does nof_batches steps instead of just one!
+    
+    - Choosing Mini-Batch Size -
+        . batch_size = m -> Standard Batch Grad Descent
+        . batch_size = 1 -> Stocastic Grad Descent
+            -> because each update only uses one and training example, the "steps" grad descent will take can converge or diverge to the global minima, but on average will converge. Sill it wont ever converge completly and wonder around near the minima  
+
+        . Small enough so your machine can handle it, but big enough so you take advantage of vectorzation/SIMD operations
+
+        . If your trainig set is small (< 2000) use just Batch Grad Descent
+        . Use minibatches os power of 2 size (64, 128, 256, 512) (raraly go over 512, and cross validate to pick the best)
+            -> And make sure it fits the CPU/GPU memory!!
+
+-- Exponentially Weighted (moving) Average --
+    -> V_t = beta*V_t-1 + (1-beta)*Theta_t
+        . beta -> approx corresponds to the size of window of values being average (beta = 0.9, average over the last 10 values, beta = 0.99, avg over last 50 days)
+        v_t = average over (1/(1-beta) values
+
+        v_t = (1-beta)*tetha_t + (1-beta^2)*tetha_t_1 + (1-betha^3)*theta_t_2 + ..
+        -> Exponentially Decay, each weight of the "consequent" previous value is a little bit smaller in the average calculation
+
+    - Implementation -
+        V = 0
+        V = beta*V + (1-beta)*tetha_t_1
+        V = beta*V + (1-beta)*tetha_t_2
+        ....
+
+    - Bias Correction -
+        . Solve the inital error caused by the first value of V being defaulted to 0
+            ->  V_t = V_t / (1-beta^t)
+                .Helps correct the initial values.
+                .For later values, t is high, so beta^t will be approx 0, thus the correction will stop having its effect (which is good as it is not needed after V0 is not used)
+
+-- Gradient Descent with Momentom --
+    . Use the Exponentially Weighted Average of the gradients instead of its raw value -> use its Momentom of the convergion!
+        -> Usually works faster than plain Gradient Descent!!, specially for Mini-Batch Grad Descent
+            . Averages the gradients, thus smoothing the noise, thus converging faster (oscilates less away from the straight optimal path)
+
+            . Implementation (new hyperparameter -> beta. Default beta=0.9 is pretty good)
+            VdW = beta * VdW + (1-beta)dW
+            Vdb = beta * Vdb + (1-beta)db
+            W = W - alpha * VdW
+            b = b - alpha * Vdb
+
+            -> Usually bias correction is not needed as it is only relevant for the initial iterations, and with beta=0.9, after the 10th iteration its worthless!
+
+-- RMSprop --  (root mean squared)
+    . Reduce oscilation away from the optimal straight convergion in grad descent (slowdown/smooth the learning in the directions away from the minima, and speed up in the optimal direction)
+    .similar to momentom, but using root mean squared of the square moving average to smooth big oscilations/noise
+
+    SdW = beta_2*SdW + (1-beta_2)*dW^2
+    W = W - alpha * (dW/(sqrt(SdW) + epsilon))     epsilon = small number, e.g: 10^-8    <- this number is just to make sure we dont devide vy very small number (increase numerical stability)
+
+    -> weights dimentions with large gradients/slopes will get slowed down (because we devide by the square root of it, so penalize more large!)
+
+-- Adam Opttimization --
+    ADAM - Adaptive moment estimation
+    . Combining Momentom and RMSprop
+
+    i. Initiliaze:  VdW, SdW = 0  (same for b)
+    ii. On iteration t: compute dW (mini batch)
+        VdW = beta_1*VdW + (1-beta_1)*dW
+        SdW = beta_2*SdW + (1-beta_2)*dW^2
+
+        VdW_bias_corrected = VdW/(1-beta_1^t)
+        SdW_bias_corrected = SdW/(1-beta_2^t)
+
+        W = W - alpha * (VdW / (dW/(sqrt(SdW) + epsilon))
+
+    -HyperParameters Choice-
+        . alpha -> needs to be tuned
+        . beta_1 -> 0.9  (usually no need to tune) 
+        . beta_2 -> 0.999 (usually no need to tune)
+        . epsilon -> 10^-8 (no tunning....just adds numerical stability to the )
+division
+
+-- Learning Rate Decay --
+    . Slowly reduce the learning rate over time
+    . Help converge better when using mini batch grad descent (so it wonders closer and closer to minima)
+    . Not a critical method (but can improve grad descent)
+    
+    many different methods:
+    - method 1 Implementation -
+        1 epoch = 1 pass through data
+        alpha = alpha_0 / (1 + decay_rate * num_epoch)  (e.g: alpha_0 = 0.1, decay_rate = 1)
+
+    - method 2 Implementation
+        alpha = exponent_decay_rate^epoc_num * alpha_0  (e.g: exponent_decay_rate = 0.95)
+
+-- Local Optima --
+    . In a high dimentional space, there arent that many points with zero gradient in all dimentions that is not the optimal minima (probably none...)
+    -> So the problem of getting stuck in a local minima is very very unlikely in a high dimentional space!!
+
+    -> Plateaus -> longe areas with gradients near zero.
+        . Slows down convergence, as it moves very slowly per iteration
+        . Adam (momentom and RMSprop) can help here, to speed up this slow areas
+
