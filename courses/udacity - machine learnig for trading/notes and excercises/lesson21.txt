@@ -1,0 +1,14 @@
+---Machine Learning for Trading---
+
+. Using Machine Learning to predict stock prices
+
+-> "WATCH VIDEO 8 of lesson 21" to see an example of a forecasting application (and its parameters)
+	. https://classroom.udacity.com/courses/ud501/lessons/4684695874/concepts/46403887880923
+
+. Do "BACKTESTING" -> rollback time and test to see how the model would perform (simulate a portfolio and check the results)
+	. "video 10 of lesson 21"
+
+-regression drawbacks and problems-
+	. noisy and uncertain
+	. cahllenging to estimate confidence
+	. hard to know the holding time and allocations

@@ -1,0 +1,21 @@
+---Efficient Markets Hypothesis, EMH---
+-assumptions-
+    . large number of investors looking to make profit
+    . new external information arrives randomly and markets react quickly by investors
+    . prices adjust quickly
+
+. information: where does it come from?
+    . price/volme: public, quick to access -> bases for techical analysis
+    . fundamental data: reported quarterly, public, more related to the value of the company
+    . exogenous: information about the world that affects the company (e.g:price of oil)
+    . company insiders: secret, but could be game changer
+
+-3 forms of the EMH-
+    .weak: future prices cannot be predicted by analizing historical prices (but predictions can be made with fundamental info)
+    .semi-strong: prices adjust rapidly(instantanously) to new public information (fundamental info not good also, only inside info might help us)
+    .strong: prices reflect all information, both public and private (fuck, no room to make predictions and make money)
+
+
+--IS THE EMH CORRECT--
+    . If it is, then we cant beat the market
+    . So we hope #it IS NOT# (but the "weak" form is more true than strong)

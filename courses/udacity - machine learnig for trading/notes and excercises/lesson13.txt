@@ -1,0 +1,16 @@
+---Value of a Company---
+. The "stock price" can be different than the "real value" of a company (speculation, etc)
+	. if stock price > true value (selling oportunity) and vice versa
+
+-Real Price Estimation-
+	. intrinsic_value: the value of the company dividens (how much you make per your per share) divided by the discont rate
+		. Discount rate -> how much interest rate does the company pays you over the dividends (the less trusty a company is, the higher is must offer to be desirable)
+			. = dividends / discount_rate
+
+	. book_value: = total_assests_of_the_company (except intagible assets) minus liabilities  
+		. intagible_assets -> patents, and other things hard to price
+		. liabilities -> loans
+		. eg: total_assets = 40, intagible_assets= 15, liabilities = 10, book_value = 40 - 10 = 30
+
+	. market_capitalization: = num_shares * Price
+		. value is determined by the market

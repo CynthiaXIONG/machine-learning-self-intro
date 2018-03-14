@@ -1,0 +1,35 @@
+---Market Mechanics---
+
+- order: 
+	. buy or sell - to buy or to sell
+	. symbol - id of share (BTC, GOOG, etc)
+	. num_shares - num of shares!
+	. limit or Market - 
+		market -> accept the price the market is bearing. no price is specified (the best possible)
+		limit -> the order has price limit (need to specify a price)
+	. price - only for limit orders, represents the limit the price can get to
+
+	example: "BUY,IBM,100,LIMIT,99.95", "SELL, GOOG, 150, MARKET"
+
+- order_book:
+		- BID: want to buy
+		- ASK: want to sell
+	. orders are registered by the "order" they arrive
+
+-How Hedge Funds exploit the market mechanics-
+	. Hedge funds have colocated computers on the physical stock exchanges, and can match a order much faster than the usual customer
+
+
+-Selling Short-
+	. you "sell short" if you believe the price will go "down"
+	. order implemented by the "broker" and not by the stock exchanges
+	. we are selling stock we don't own...
+
+	#Entry# -> you "loan" shares from a holder, and sell it to a buyer
+				. results in you cashing the money the buyer payed you, but 
+				now you "owe" that amount of shares to the original holder
+
+	#Exit# -> you "exit" by buying the shares that you owned and give it back to the original holder
+
+	. you make profit if you sold at an higher price than you bought back (the price went down)
+	. the "danger" is if the price goes up, for you to exit, you will lose money!!

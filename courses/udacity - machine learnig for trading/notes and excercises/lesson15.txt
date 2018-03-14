@@ -1,0 +1,19 @@
+---How Edge Funds use CAPM---
+
+--using CAPM to calc espected portfolio return--
+. if we have model that predicts both alpha and beta correctly for the stocks
+. we allocate the weights for each portfolio stock allocation
+    . positive -> long (holding/buying)
+    . negative -> short (short selling)
+. we calc "rp" with CAPM
+    -> rp = sum_i(w_i * (beta_i*market_ret + alpha_i))
+
+    assume we can predict alpha and beta, but:
+     . becase market_ret is not predictable, beta*market_ret is unreliable
+        . if we can make beta for the portfolio = 0 (by suming all bethas_i*wieghts with positive and negative wieght values (longs vs short) ),
+            we can eliminate market RISK
+        . and we should sell short the ones with negative alpha and buy long with positive alpha
+    SUMMARY:
+        -> minimize market risk ->beta_port = 0 
+            by selecting the correct weights (long buy and short sell )
+        -> short sell on alpha negative and buy on positive to have positive portfolio return

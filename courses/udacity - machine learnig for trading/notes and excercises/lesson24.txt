@@ -1,0 +1,32 @@
+---Ensemble learnings---
+
+-Combine learnings doing averages of their predictions to-
+	->reduce bias
+	->lower error
+	->less overfitting 
+	#note# because different learnigs have bias for different problems 
+			so they will overfit same particular problems.
+		by using the average of multiple, their particular bias are canceled
+
+. Example_of_an_ensemble:
+	-> Combine these:
+		-> Several parameterized polynomial of different degrees
+		-> Several KNN models using different subsets of data -> #boostrap_aggregating_bagging#
+
+
+-boostrap_aggregating_bagging-
+	. combine the "same learner" model, but using "different subsets of the data" (bags) for each
+		. create this subsets with random data instansces (random with replacement -> can be repeated)
+		. each subset can have as a rule of thumb 60% of the data
+	. train each model, query and do the "mean" of results!!
+
+-boosting_ada_boost-
+	. similar to boostrap_aggregating_bagging, 
+	but tries to improve the training on data with the biggest errors ("boosting")
+		i. create fist subset of data (bag), train it and "test will ALL data"
+		ii. give weights to the instances of the data depending on 
+			how big their error was (bigger wieghts to bigger errors)
+		iii. try to pick for the second "bag" preferably the instances 
+			with bigger weight (error), so we train more pricesily for those
+		iv. repeat this for the other models
+	#note# boosting too much can cause overfitting!

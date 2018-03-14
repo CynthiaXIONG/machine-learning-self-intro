@@ -1,0 +1,20 @@
+---Portfolio Optimization---
+
+	. covariance: how a stock varies in relation with another
+		. Its possible to mix stocks in a Portfolio that have positive return 
+			but their variation is the oposite ("anti-covariation")
+			so its cancels each other out -> lower the average std 
+				->Portfolio has LOWER RISK than any individual stock
+
+-Mean Variance Optimization _ MVO-
+	-> optimizer that mixes stocks with anti-covariation so their mean variation is lowered
+
+	- #inputs#
+		. expected_return:
+		. volatility: std
+		. covariance: matrix between each stock and any other stock their relation)
+		. target_return:
+	- #outputs#
+		. assets_weights: for the Portfolio that minimize the risk for the target return
+
+	note: Efficient Frontier -> Theoretical limit for a Portfolio risk-return

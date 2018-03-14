@@ -1,0 +1,13 @@
+---Lesson3---
+
+. panda lib for csv
+. pandas.reads_csv("data.cvs", index_col="Date", parse_dates=True, usecols=['Date', 'Adj Close'], na_values=['nan'])  -> sets the Date as the index col (for joining)  (Lesson3.9)
+. create dataframe: df1 = pandas.DataFrame(index=pandas.data_range('2010-01-01', '2017-01-01')) 
+. df1 = df1.join(dfTESLA, how='inner')    http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.join.html
+. df1 = df1.rename(columns={'High':'DF1High'})  -> renames High into DF1High
+. http://pandas.pydata.org/pandas-docs/stable/indexing.html
+. df1.ix['2010-02-02':'2010-02-27']  -selects this data
+. df1['GOOGLE'] - selects just the Data column
+. df1[['GOOGLE', 'TESLA']] - selects this 2 columns
+. #combining# df1.ix['2010-02-02':'2010-02-27', ['GOOGLE', 'TESLA']]
+. #nomalizing# df1 = df1 / df1.ix[0,:]  ->pandas will do divide the dataframe by the initial data (first row)

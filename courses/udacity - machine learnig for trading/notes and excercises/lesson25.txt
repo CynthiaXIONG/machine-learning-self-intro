@@ -1,0 +1,43 @@
+---Reinforcement Learning RL---
+. create policies to provide directions on actions to take
+
+--The RL Problem--
+ -> S: State of the enviroment
+ -> PI: Policy to thatt akes S as input and outputs actions (A)
+ -> A: Action, that will in turn affect the enviroment and its State
+ -> R: Reward...PI tries to maximize the reward
+ -> T: Transiction function 
+
+-Mapping to Stocks-
+    -S: 
+        Market Features (dr,) 
+        Holding long or short a stock
+        Not Holding
+    -A:
+        Buy
+        Sell
+        Do nothing
+    -R:
+        return
+        daily return
+    -T:
+        the market
+
+--Markov Decision Problems--
+. set_of_states_S
+. set_of_actions_A
+. transition_function_T[s,a,s'] -> Transition function
+                                    . Calculates the probability of going from state "s" to "s'" by taking action Action
+. reward_function_R[s,a] -> Reward from being in a state "s" and taking action A,
+
+GOAL - Find:
+    policy PI(s) -> that will maximize R
+
+-Unknown trasitions and rewards function-
+. Model must learn these functions by "experimenting" out different actions 
+    .<s,a,s',r> : experience tuple (when you observe state "s" and take action "a" we end up in state "s'" and get "r" reward)
+
+
+#note#: because a reward is worth less the later we get it, 
+        we can factor this into the reward function
+ -> discounted_reward: sum_i(labmda**(i-1) * r_i)  , lambda[0:1] (lambda relates to interest rates)

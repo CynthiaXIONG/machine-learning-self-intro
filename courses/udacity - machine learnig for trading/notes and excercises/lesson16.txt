@@ -1,0 +1,33 @@
+---Technical Analyses---
+. only analyses "price and volume" (instead of earnings, dividens, cash flow etc... <- "fundamental factors")
+. statiscis on price and volume -> "indicators" (are "heuristics" that hint for a buy or sell)
+
+--Effictiveness--
+. "individual" indicators are weak predictores
+. "combination of indicators" with machine learning could be very strong
+. look for "constrats" (if certain stocks behave differently from market) <- this is worth a further look
+. techincal analyses work better for "shorter time periods" (milliseconds, seconds, trades on the same day)
+. fast decisions, but easy decisions (not complex) -> good for compute driven trading
+
+--Some techincal Indicators--
+-Momentum-
+	. over a short perior (could be some days), how much has the price changed
+	. correspondes to the "m" of two points chosen the the selected period of time
+	-> momentum[t] = price[t]/price[t-n] - 1  (momentum for day 'y' for the period of days 'n')
+
+-Simple moving avarage SMA-
+	. simple avarage over the certain window of time (see previos class)
+	. #SEE LESSON 5 -> Rolling Mean
+	. when the price crosses the rolling mean, could be a signal -> "SMA Cross"
+
+-Bollinger Bands-
+. #SEE LESSON 5 
+	. limits placed at + and - 2*std (standard deviation) from the SMA
+	. If price crosses back those bands (was out and moving back to the SMA),
+		then its a good signal for buy/sell
+
+
+--Normalization--
+. this factor must be normalized for machine learning
+
+ -> normed = (values - mean) / values.std()

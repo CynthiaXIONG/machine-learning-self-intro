@@ -1,0 +1,35 @@
+---Capital Asset Pricing Model - CAPM---
+
+. NOTE: Market portfolio -> a "symbolic" portfolio that represents the market, 
+			where the weight of each stock allocation is proportional to the company market capitalization value
+	e.g: "SP500" -> index that representes the top 500 companies in the US
+
+-CAPM-
+-> r_i(t) = β_i*r_m(t) + α_i(t)
+
+	r_i -> return on a particular day
+	r_m -> return of the market on a particular day
+	β_i -> beta of the stock on a particular day, 
+		=> slope(m) = β, represents how reactive a stock is to the market (SPY)
+	α_i -> alpha of the stock on a particular day
+		=> intersection with 0 (b) = α, if positive, means that this stock has better performance than market(SPY)
+
+		α and β -> see lesson 7, Scatter Plots from the difference between the daily returns of two values (two 'stocks') 
+
+-CAPM vs Active Management-
+	. passive: buy index (from the market portfolio) and hold
+	. active: pick stocks (and use different weights from the market portfolio, can be 0, or even negative (selling short))
+
+	. CAMP-> passive managers believe α is "0" or very close to it (but is "random"...)
+	. Active managers-> believe that α can be predicted and taken advantage of!
+
+-according_to_CAPM-
+. because alpha is random, we can only "beat" the market by using good betas
+ -> chose high β in up markets (gain more)
+ -> chose low β in down markets (lose less)
+. but it also says that you can predit the market, stock
+
+!CAPM SAYS YOU CANT BEAT THE MARKET!
+
+
+

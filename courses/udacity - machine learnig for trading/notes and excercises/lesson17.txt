@@ -1,0 +1,21 @@
+---Dealing with DATA -> Historical Price and Volume---
+
+. there can be 100.000 transactions per second...how to manage so much data?
+	-> consulidate this "tick data" into minute/hour/day chunks
+		-> chunks data: OPEN, HIGH, LOW, CLOSE, VOLUME  <- for the specific time interval
+
+NOTE:
+	. stock_split: if stock price is too high (that can make buying just one stock to pricey), split the stocks (1 stock of 100 -> 2 stocks of 50)
+
+	. Dividends:
+		. The money paid buy the company per share per year.
+		. When dividens are anounced, the price just before the dividend is in action goes up to meet this extra value,
+ 	when the dividend is in effect it will move back
+
+#ADJUSTED_CLOSE#: The price of the CLOSE using today's share split and dividends change correction.
+	. This way we can check past data without reading it wrong (misreading a stock split with a big price drop)
+
+. Note: 
+	 Survivor Bias -> if you pick historic data, try to pick data that has the stocks that "died" and
+	 					not just the ones that made it through till the present
+	 					#Use survivor Bias Free Data#

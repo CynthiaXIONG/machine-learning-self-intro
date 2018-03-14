@@ -1,0 +1,45 @@
+---Regression---
+
+-Parametric- Linear Regression
+. Use a parametric equation, where you find the parameters (m and b, or x0, x1, x2, etc..)
+	that create a function that fits the data
+	. Easy to use if we know that the problem output can be fitted with a parametric function
+	. This model is biased because of the parametric function we choose beforehand
+	. Traning is slow but quering is fast
+	. Requires less memory, because data is not saved, only the parameters are used when quering
+	. New data requires recalculation of the parameters (re-training)
+
+-Non Parametric- Instance based
+. K-nearest-neighboor <- example of an non parametric regression algorithm
+	. Picks the output from the current data (for example the mean value of the K nearest inputs )
+	. Usefull if the output does not seem to follow a model that can be described with a parametric function
+	. This method requires that we need to store the original data so we can access it to check the neighboors
+	. This method more easily fits any shape of the output data
+	. Adding new data does not require re-training so fastest to train =D (but slower to query)
+	. Requires lots os disk space for saving the model as it needs to save all the data for future queries
+
+. We need to use different data for testing than the data we used for training
+	-> "Testing with Out of Sample Data"
+
+-Learning API- To be implemented by me!
+	. linear_regression:
+		. learner = LinRegLearner()  #creates an instance of the learner
+		. learner.train(Xtrain, Ytrain)
+		. Y = leaner.query(Xtest)
+
+		#PSUDO CODE#
+			def__init__(): #contructor -> do nothing
+				pass
+			def train(X, Y): #should find the parameters for the equation that will fit
+				self.m, self.b = favorite_linreg(X,Y) #use a linear_regression function from a external lib
+			def query(X)
+				Y = self.m * X + self.b
+				return Y
+
+	. knn:
+		. learner = KNNLearner(k = 3)  #k is the number of nearest-neighboors to query
+		. learner.train(Xtrain, Ytrain)
+		. Y = leaner.query(Xtest)
+
+		. note: the higher the K, the more underfitted our model gets
+				.k = 1 -> as overfitted as it gets (basically "jumps" to each point of the training set)

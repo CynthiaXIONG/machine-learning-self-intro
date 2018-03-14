@@ -1,0 +1,36 @@
+---Dyna---
+. Q-Learning problem:requires experiments to converge and these are expensive for the stock market context (will loose a lot of money)
+
+--Dyna-Q--
+. Algorithm to speed up Q-Learning, using "simulated" action interactions
+. For each real experience, run 100s of simulated experiences, improving on the learnings of the real interaction
+
+0. Run Q-Learn on a real case once
+i. Learn Models for T and R (or Update the existing models), based on real experience
+ii. "Simulate" experiences
+iii. Update Q
+iv. Repeat from ii. many many times (100s times), before doing another "real" experiment
+
+-Learning T (transform function)-
+. T[s,a,s'] -> the probability of being in state "s" and taking action "a" ending up in state "s'"
+
+    . Create new table to count the frequency of the trasitions
+    eg: T_count[] = 0.000001  (not zero so we can divide by i)
+        when is observed a specific "s,a,s'" increment T_count[s,a,s'] 
+
+    T[s,a,s'] = T_count[s,a,s'] / sum(T_count) 
+
+-Learning R (reward function)
+. R[s,a] -> expected reward from being in state "s" and taking action "a"
+
+    . r -> immediate reward (from a "REAL" experience tuple)
+    R[s,a] = (1-alpha)*R[s,a] + alpha*r    (alpha = 0.2 for eg)
+
+
+--How to Simulate and Experince--
+i. Randomly select and "s" and an "a"
+ii. Infer new state "s'" from T[]
+iii. Get the reward "r" from R[]
+
+#resources#: lesson 26
+    . http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching_files/dyna.pdf

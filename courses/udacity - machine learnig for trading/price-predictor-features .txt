@@ -1,0 +1,10 @@
+lookback days data
+	-close, open, high, low, volatility
+Momentum,
+
+williams,
+rate of change,
+SMA
+STD
+volume
+

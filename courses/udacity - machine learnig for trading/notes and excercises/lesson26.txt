@@ -1,0 +1,76 @@
+---Q Learning---
+. Model for Policies that 
+	does not use a model for the transiction function (T) or the reward function (R)
+. Builds a table of utility values devired from experimenting, 
+	to be selected the best action based on what it has learned so far
+. Garanteed to provide the optimal policy
+
+-> Q[s,a] = table with dimensions s(state) and a(action).
+	- Q represents the value of taking action "a" in state "s" 
+		= immediate reward + discounted reward (for furture actions)
+
+-Find the best policy-
+	PI(s) = argmax_a(Q[s,a])  -> find the "a" that maximizes Q.
+	PI*(s) = the optimal value  (it convergest to the max)
+
+-QLearning Process-
+	. select trainig data
+	. iterate over time <s,a,s',r>  -> experience tuple
+	. use the experience tuple to update the "Q" table
+	. repeat until it converges (to the max, PI*, Q*)
+
+	- iterating_over_the_data:
+		i. set starttime, and initialize "Q", with small random numbers
+		ii. compute "s" (observe the features of the market and stock)
+		iii. consult Q to find the best action "a"
+		iv. step forward and observe the "r" (reward) and "s'" the new state
+		v. improve "Q" based on the tuple create in ii, iii and iv <s, a, s', r>
+
+
+	- update_rule:
+		v. improve "Q"
+			a. Q'[s,a] = (1-alpha) * Q[s,a] + alpha*improve_estimate   (alpha[0:1], learning rate = 0.2 for example)
+																			higher alpha, faster learning but can be more risky
+				. improve_estimate: = r + gamma * later_rewards ,(gamma[0:1] discount rate, how much we value later rewards )
+
+				. later_rewards: = Q[s', argmax_a(Q[s',a'])] -> estimate the future Q[s',a'], so we need to estimate the future next action "a'"
+
+#note#
+	. when training, have a probability of choosing a completely random action instead of the best possible one:
+		- Explore more possibilities
+		- e.g: Start with a prob of 0.3 and then slowly reduce it (0.3 prob of picking a random action)
+
+	#note# taking a random action (a trade) just to learn a good strategy is not feasible (WILL LOSE A LOT OF MONEY)
+
+
+	- defining_state:
+		- adjusted close / SMA ratio is a good feature for start (to improve learning)
+		- bollinger band value
+		- P/E ratio (price/earnings)
+		- holding stock
+		- return since entry (help set exit points)
+
+		-> state is an #integer# (so we can address it in a table, easier to work)
+			-> need to first discritize each factor  (for example from 0-9)
+			-> combine all integer factors into a single number
+				eg:
+					X1 - 25.6 -> discritize = 0
+					X1 - 0.3 -> discritize = 6
+					X1 - 2.0 -> discritize = 2
+						. state = 062
+
+			discritizing:
+				- define number of steps (0-9, so 10 steps)
+				- sort the data, distributing it through that range and discritize
+				 eg:
+				 	stepsize = size(data)/steps
+				 	data.sort()
+				 	for i in range(0, steps)
+				 		thresholds[i] = data[(i+1)*stepsize]
+
+
+#RESOURCES# video 14 of lesson 26
+	. http://mnemstudio.org/path-finding-q-learning-tutorial.htm
+
+
+

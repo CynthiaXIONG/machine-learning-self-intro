@@ -1,0 +1,53 @@
+---Hedge Funds---
+-Types_of_Funds-
+. ETF: (exchange trade fund) 
+	- are like stocks (trade, buy/sell like stocks)
+	- transparent and liquid
+. MutualFunds:
+	- buy and sell only at end of the day
+	- less transparent (dont know very well what was sold or bought)
+. HedgeFunds:
+	- buy and sell by agreement (put money there, and cant take out when you want)
+	- no disclosure (dont know what they are holding)
+	- not transparent
+
+
+- Liquidity: how easy is to buy and sell
+- Capitalization: how much the company is worth (num_shares * price)
+- AssestUnderManagement:(AUM) how much money is being managed by the fund
+- ExpenseRation: percentage of the AUM that a fund takes for the managers (ETF's uses a low value, Mutual funds use a higher as they are more specialized)
+- Two-and-Twenty: how the hedge funds managers are compensated (2% of the AUM and 0.2% of the profit)
+				This model motivates greater profits (and higher risk taking), as well as AUM accumulation (2%).
+				Expense Ration motivates only AUM accumulation
+
+
+
+-popular pages for market search-
+	. https://www.bloomberg.com/markets
+	. https://www.google.com/finance.
+
+
+-Hedge fund GOALS and METRICS-
+- goals:
+	. beat_a_benchmark: e.g: beat a "SP500" index (note that this could still mean negative return..just less than benchmark)
+	. absolute_return: positive return
+- metrics:
+	. cumulative_return: final / initial (port_val[-1]/port_val[0] - 1)
+	. volatility: how rapidly/aggresively the portfolio goes up and down => daily_rets.std()
+	. risk_reward: equivalent to sharp_ration (risk adjusted reward) => sqrt(252) * mean(daily_rets - rf) / daily_rets.std()
+
+-HedgeFund_Computation-
+. live_portfolio: the current "active" portfolio
+. target_porfolio: the calculated desired target_portfolio
+. trading_algorithm: . try to make the "live portfolio" match the "target portfolio"	
+					. makes the trade orders (buy/sell) to reach this goal
+					. for big trades, a big trade order will affect the current market (the avaible matches) and make the prices rise/fall a lot....
+						so its desired to do this operations in smaller orders, spaced in time
+. portfolio_optimizer: will compute the target portfolio
+				. will use these inputs: -current portfolio (current) -> know if we just bought and selling right away will have penalities (fees)
+										-forrcast data (prediction) -> predict if the stocks will go up or down (and buy/sell accordingly)
+										-historical data (history) -> check historical data, check correlation betweens different stocks
+				. balance the risk, volatility, reward
+. forecasting_algorithm: computes the forecast data (Machine learning based model)
+				. inputs: -historical data -> past data
+						-information feed -> proprietary information (external)

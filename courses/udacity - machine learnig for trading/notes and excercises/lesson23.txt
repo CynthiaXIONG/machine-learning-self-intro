@@ -1,0 +1,25 @@
+---Assessing Learning Algorithms---
+
+-Root Mean Squared Error RMS-
+	. RMSE = sqrt(sum((y_test - y_predict)**2) / n)
+
+-Methodology to test Data-
+	. one_trial: 	->60% of data use to train, and test with 40% rest
+					->Measure RMSE (of test data)
+
+	. cross_trials: ->split data into chunks, e.g: 5 chunks
+					->use 60-80% of chunks to train and the remaning to test
+					->switch around the chunks and preform more trials!
+
+					->#NOTE#: never have test data from a time before the training data,
+					because this is "peaking into the future"!!
+						-> Dont use all the chunks at the same time, but always keep the chronological order
+
+-Correlation-
+	. Measure the correlation between the predicted and the real values (y_predict vs y_test)
+	. use numpy function "np.corrcoef()" -> outputs value [-1, 1]:
+			-> 1, strongly correlated, GOOD
+			-> -1, inversely correlated, BAD
+			-> 0, not correlated at all, BAD
+
+#Note#: As RSM error increase, correation decreases

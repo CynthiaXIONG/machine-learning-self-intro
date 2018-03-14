@@ -1,0 +1,35 @@
+---Law of Active Portfolio Managemnt---
+
+- grinolds_law: performance = skill * sqrt(breadth)  => IR = IC * sqrt(BR)
+	performance -> IR (infomation ratio)
+		IR = mean(alpha_port) / std(alpha_port)  ->sharpe ratio of return using only the alpha component (excess return)
+	skill -> IC (infomation coeficient, skill for making a single pick)
+		IC = correlation of forecasts to returns  (value [0-1])
+	breath -> BR (how many trading opportunities we have)
+		BR = trading opportunities per year
+
+--Analogy with Coin Flipping--
+. flip coins instead of stocks
+. the coin is biased (e.g "alpha" 0.51 heads, so slight more change of getting heads)
+. uncertainty is like "betha"
+
+	bettingsimulation: bet N coins ->win: get 2*N, lose: get 0
+	. 1000 tables available
+	. 1000 tokens available
+	. all 1000 coin flipping games run in parallel and simultaniously
+
+	2 bet:
+		. a) 1000tokens on 1 table only
+		. b) 1 token per table (1000 tables)
+
+	->"a" is more risky than "b", excepted return is the same as "b", but risk(std) is 30times larger than "b)"
+	shaper_ratio: sr_a = 20 / 30 = 0.63 | sr_b = 20 / 1 = 20
+	-> Option "b" is a clear winner (much less risk for the same excepted return)
+
+	note: sr_b = sr_a * sqrt(1000)  (like performance)
+
+	#summary"
+	-> higher alpha = higher shaper_ratio
+	-> shaper_ratio grows with sqrt(breath)
+	-> #easier to increase breath then skill#
+
