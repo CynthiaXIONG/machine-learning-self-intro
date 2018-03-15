@@ -2,12 +2,14 @@ import os
 import numpy as np
 import h5py
 
-def load_week2_dataset(m):
-    train_dataset = h5py.File('week_2_train_signs.h5', "r")
+def load_week2_dataset():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    train_dataset = h5py.File('week2_train_signs.h5', "r")
     train_set_x_orig = np.array(train_dataset["train_set_x"][:]) # your train set features
     train_set_y_orig = np.array(train_dataset["train_set_y"][:]) # your train set labels
 
-    test_dataset = h5py.File('week_2_test_signs.h5', "r")
+    test_dataset = h5py.File('week2_test_signs.h5', "r")
     test_set_x_orig = np.array(test_dataset["test_set_x"][:]) # your test set features
     test_set_y_orig = np.array(test_dataset["test_set_y"][:]) # your test set labels
 
@@ -49,4 +51,8 @@ def random_mini_barches(X, Y, mini_batch_size=64, seed=0):
     X_shuffle, Y_shuffle = shuffle_data_set(X, Y, seed=seed)
     mini_batches = split_data_set_to_mini_batches(X_shuffle, Y_shuffle, mini_batch_size)
     return mini_batches
+
+def convert_to_one_hot(Y, C):
+    Y = np.eye(C)[Y.reshape(-1)].T
+    return Y
 
