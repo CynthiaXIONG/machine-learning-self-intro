@@ -396,8 +396,34 @@ def ResNet50(input_shape = (64, 64, 3), classes = 6):
     
     # Create model
     model = Model(inputs = X_input, outputs = X, name='ResNet50')
-
     return model
+
+## -- Keras-LeNet5 -- ##
+def KerasLeNet5(input_shape = (64, 64, 3), classes = 6):
+
+    # Define the input as a tensor with shape input_shape
+    X_input = Input(input_shape)
+
+    X = X_input #no intial zero padding
+
+    #CONV1
+    X = Conv2D(filters=6, kernel_size=(5, 5), strides = (1, 1), padding = 'valid', name = 'conv1', kernel_initializer=glorot_uniform(seed=0))(X)
+    X = AveragePooling2D((2, 2), strides=(2, 2))(X)
+    #CONV2
+    X = Conv2D(filters=16, kernel_size=(5, 5), strides = (1, 1), padding = 'valid', name = 'conv2', kernel_initializer=glorot_uniform(seed=0))(X)
+    X = AveragePooling2D((2, 2), strides=(2, 2))(X)
+    #FC3
+    X = Flatten()(X)
+    X = Dense(120, activation='relu', name='fc3')(X)
+    #FC4 
+    X = Dense(84, activation='relu', name='fc4')(X)
+    #OUT-Softmax
+    X = Dense(classes, activation='softmax', name='fc' + str(classes), kernel_initializer = glorot_uniform(seed=0))(X)
+
+    # Create model
+    model = Model(inputs = X_input, outputs = X, name='LeNet5')
+    return model
+
 
 #--------- WEEK 1-A ---------#
 def week_1_a():
@@ -420,7 +446,7 @@ def week_1_a():
 
 #--------- WEEK 2 ---------#
 def week_2():
-    X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = py_datasets.load_week2_dataset()
+    X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = py_datasets.load_signs_dataset()
 
     # Normalize image vectors
     X_train = X_train_orig/255.
@@ -438,7 +464,26 @@ def week_2():
     print ("Loss = " + str(preds[0]))
     print ("Test Accuracy = " + str(preds[1]))
        
+def try_lenet_5_keras():
+    X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = py_datasets.load_signs_dataset()
 
+    # Normalize image vectors
+    X_train = X_train_orig/255.
+    X_test = X_test_orig/255.
+
+    # Convert training and test labels to one hot matrices
+    Y_train = py_datasets.convert_to_one_hot(Y_train_orig, 6).T
+    Y_test = py_datasets.convert_to_one_hot(Y_test_orig, 6).T
+
+    model = KerasLeNet5(input_shape = (64, 64, 3), classes = 6)
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.fit(X_train, Y_train, epochs = 100, batch_size = 32)
+
+    preds = model.evaluate(X_test, Y_test)
+    print ("Loss = " + str(preds[0]))
+    print ("Test Accuracy = " + str(preds[1]))
+
+    #plot_model(model, to_file='model.png')
 
 #--------- MAIN ---------#
 def main():
@@ -447,7 +492,13 @@ def main():
 
     #week_1_a()
 
-    week_2()
+    #week_2()
+
+    try_lenet_5_keras()
+
+
+
+
 
 if __name__ == "__main__":
     main()
