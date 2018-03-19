@@ -1,0 +1,79 @@
+--- Detection Algorithms --- 
+
+    -- Object Localization --
+        . identifying the position/bounding box of an object in a image
+        . just 1 object per image instead of multiple objects to detect (object detection problem)
+
+        - Classification with Localizaton -
+            . output of model is the tradition classification softmax + the bounding box coordinates (4 values)
+            -> Bounding box is defined by the center point (bx, by) and dimentions (bw, bh)
+                . coordinate values are relative (0-1), where (0,0) is top left corner.
+
+            Y - [Pc, bx, by, bh, bw, C1, C2, ..., CC]     
+                . Pc -> "is having an object?" (1 or 0)
+                    . only if there is an object, Pc = 1, the rest of the values are valid, and the model "cares about it!" (dont do backprop on them)
+                . bx, by, bh, bw -> BB values
+                . C1, C2, ... -> the classes (regular softmax output)
+
+             ->> Loss Function
+                . L (y_pred, y) = (y0_pred - y0)^2 + (...)^2 + (yl_pred - yl)^2   <-- if y0 == 1 (Pc = 1)
+                                = (y0_pred - y0)^2 <-- if y0 == 0
+
+
+    -- Landmark Dectection --
+            . output x,y coordinates of important "landmarks" on a picture (e.g: corner of an eye of a person)
+                . used for identifying important landmarks in a face/body, for emotion recognition, pose detection, snapchat AR filters, etc..
+
+-- Object Detection --
+    --Sliding Windows--
+        . Using convolution/ConvNet to achieve the sliding windows
+
+            -Car Detection Example:
+                i. Have training data of cropped cars (car filling almost all the picture) and images without cars
+                ii. Train a ConvNet so it is able to classify this images (cropped ones)
+                iii. Do a sliding window in a similar way as you do the convolution operation through an image (pick an filter size (hxw) and a stride, and feed this window into the initial ConvNet
+                iv. Repeat using different window sizes
+
+                -> This is very expensive, as you have to classify every window with ConvNet (which is expensive!)...not duable...
+                ->> Solution is to use a convolutional implementation!!
+
+    -- Convolutional Implementation of Sliding Windows --
+        . Reuse the calculations that are shared between overlapping windows, so you have to make less calculations
+        -> Turn FC layer into CONV layer
+            use 1x1xn_C dimention volume
+        -> Input a slightly bigger window then your windows size to the ConvNet (2 more pixels in each direction), and the FC layer will be instead 2x2xn_C (if you input just a slightly bigger window what is the size total area of 4 overlapping sliding windows), and you are now calculating 4 windows in one pass, with a much smaller computational overhead as a lot of the convolutional calculations are shared and reused ( on the part of image that is commun)
+            -> 8 pixels bigger -> 8x8 sliding windows
+            ->> DO THE ENTIRE IMAGE <<-
+        
+        ISSUE: it does not output the most accurate bounding box for the object (just the window where it is)
+
+    -- Bounding Box Prediction - YOLO Algorithm --
+        . YOLO - You Only Look Once : https://arxiv.org/abs/1506.02640
+
+        . Divide the image in a grid (10x10, 19x19) and apply the Localization algorithm to each cell
+            . the output is the same Y = [ Pc, bx, by, bh, bw, C1, ..., CC]
+            . even if an object spans accross multiple cells, only the cell which contains the center of its bounding box has Pc=1 (has a valid object!)
+            . The target output "volume" of the ConvNet is all the cells Y combined, so for example for 3x3grid with C=3 (Yi = 8x1) is: 3x3x8
+                -> This is a convolutional implementation (lots of shared computation, very effecient, used for realtime detection)!!!!
+            -> This model output precise bounding boxes for the objects!
+
+            . Finer grid helps to solve the issue of having multiple objects per cell
+
+        - Bounding Boxes Encoding -
+            . Relative to the position and size of the Cell
+                . bx, by is a relative value (0-1) for the relative position on the cell
+                . bh, bw is relative to the size of the cell (can be larger than the cell, thus could be > 1)
+
+
+
+
+
+
+        
+ 
+
+
+
+
+    
+
