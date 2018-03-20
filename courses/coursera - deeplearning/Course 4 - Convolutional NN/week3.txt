@@ -64,6 +64,97 @@
                 . bx, by is a relative value (0-1) for the relative position on the cell
                 . bh, bw is relative to the size of the cell (can be larger than the cell, thus could be > 1)
 
+        - Intersection Over Union - IoU -
+            . metric to evaluate how good is the object localization (if the bounding boxes are perfect, or not the correct size / offsetted)
+            . measure of the overlap between two bounding boxes
+
+            -> IoU = intersection area of predicted bb VS actual bb / union area of predicted bb vs actual bb
+                . "Correct" if IoU > 0.5  (normal convection for this value)
+
+        - Non-max Suppression - 
+            . method to make sure the algorithm only detects the same object ONCE (bc it can span over multiple cells, and multiple cells can predict the detection of the same object -> by predicting that the center of the BB lies on its cell)
+
+            -> Clean up the multiple detections that are not the maximum probability
+                
+                -> Algorithm
+                . on a 19x19 grid, you get an output of 19x19x5 (5, bc of Pc, bx, by, bh, bw...only one category)
+                i. discard all boxes with Pc<0.6
+                ii. Use the detection with the highest 'Pc' (probablity of having the object), from all detections
+                iii. Supress the other object detection BBs that have a high IoU (IoU > 0.5) with the initial detection (with highest Pc, found on ii.)
+                iiii. Repeat ii., for the next highest (that was not surpressed)
+
+                NOTE: for multiple objects, do this algorithm for each object individually.
+
+        - Anchor Boxes -
+            . Detection of multiple objects per cell (previously only 1 object per Y, as you only detect one bounding box!)
+            . Use predefined bounding boxes -> Anchor Boxes, for "categorizing" different object detection in the same cell
+
+            . Output will be Y multiplied by the number of different anchor boxes Y = [Ya_b_0, Ya_b_1, ...]
+            . Assign the detected bounding box output to the component of the output Y (Ya_b_i) with the highest IoU between detection and anchor box centered in the same detected center
+
+            . If no dectection for a specific Anchor box, just assing Ya_b_i Pc to 0
+            
+            . Issue: algorithm does not handle well if there are more objects detected in the cell than the number of anchor boxes, or 2 obejcts detected for the same anchor box
+                . Use some kind of tie braker, like highest Pc...
+
+            -> Anchor Boxes allow the algorithm to speciallize in the detection of shapes that have a characteristic shape (like pedestrians vs cars)
+
+            -> Anchor Boxes Shape Selection:
+                Manual (5 to 10)
+                Automatic: use a K-means algorithm to group together the types of object shapes you tend to get and select a set of anchor boxes from that group
+
+    -- YOLO Algorithm Implementation --
+
+        . Example:
+            3x3 grid
+            3 classes: 1-pedestrian, 2-car, 3-motocycle
+            2 anchor boxes
+
+        y = 3x3x2x8 (2 is for the #anchor boxes, 8 -> 5 + #classes)
+
+        input (100x100x3) -> ConvNet -> output (3x3x2x8)
+
+        do non-max supression on the outputs
+
+    -- Region Proposals - R-CNN --
+        . Not very used -> optional literature... YOLO is better
+        -> Some areas of the image is pointeless to run the sliding windows (top of image for example)
+            . Just run the sliding windows on certain "regions" of the image
+
+        - How to find these regions? -
+            . Run an image segmentation algorithm (like segument areas where the color change,,,probably a new object is there), and just try to detect on those regions
+                -> this segmentation algorithm detectes "blobs" in the image (like 1000)...run ConvNet classifier algorithm on those blobs
+
+        Problem: slow, lots of blobs to compute, and only of these proposed regions is classified at a time 
+           
+            -> Fast R-CNN: use a convolutional implementation of sliding windows to classify all the proposed regions in one go! 
+                . Getting the proposed regions with the traditional segmentation algorithm is still slow..
+
+            -> Faster R-CNN: use a convolutional network to propose the regions!!!
+                . Better but still slower than YOLO!
+
+        
+
+
+
+        
+
+
+
+
+
+
+
+            
+
+            
+
+
+
+
+
+
+
 
 
 
