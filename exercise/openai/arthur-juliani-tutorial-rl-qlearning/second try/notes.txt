@@ -1,3 +1,4 @@
+http://neuro.cs.ut.ee/demystifying-deep-reinforcement-learning/
 --- RL - Q-Learning ---
 
  - Q-Learning -
@@ -17,12 +18,37 @@
                 -> Bellman Equation
                     . expected long-term reward for a given action
 
-                    Q(s,a) = r + labmda*(max(Q(s',a')))     <-update/learning function of the Q values
+                    Q(s,a) = r + gamma*(max(Q(s',a')))     
 
                         r -> immediate reward
-                        labmda -> discounted factor
+                        gamma -> discounted factor
 
                         -> immediate action from the current action combined with the expected reward from the best (maximum) future action (a') taken at the proceding/future state (s')
+
+                    .Action choice
+                        a = max(Q[s, :]) + random_noise  <- that and this noise gets decayed as the #episodes increases
+
+                    .Update/learning function of the Q values
+                        Q[s,a] = (1-alpha) * Q[s,a] + alpha*improve_estimate   (alpha[0:1], learning rate = 0.2 for example) higher alpha, faster learning but can be more risky
+                            . improve_estimate: = r + gamma * later_rewards ,(gamma[0:1] discount rate, how much we value later rewards )
+
+
+        Problem: Tables dont scale well, get way to big if the state and action space are big
+
+        -> SOLUTION: have some way to produce Q-values without a table..A NN that has as input the state and outputs the actions to take. the weights are the  Q-Values that work as a function approximator
+
+
+        -- Q-Neural network --
+            . Use backprop to train the network (updating the "Q-table")
+            . Loss function: sum-of-squares loss of predicted Q-values with the target Q-values
+                -> Loss = sum(Q-target - Q)^2
+                    Q-target = Q(s,a) = r + gamma*(max(Q(s',a')))
+
+            . Q-NN allow more flexibility than Q-tables (customization of the NN architecture) but are less stable than Q-tables 
+                . Modifications and tricks are rquired to increase the performance and robustnance of the QNN
+
+    
+
 
 
 
