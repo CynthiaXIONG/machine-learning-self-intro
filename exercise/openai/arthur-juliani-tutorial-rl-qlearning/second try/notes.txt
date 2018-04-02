@@ -1,0 +1,29 @@
+--- RL - Q-Learning ---
+
+ - Q-Learning -
+     S: State of the enviroment
+     PI: Policy to that takes S as input and outputs actions (A)
+     A: Action, that will in turn affect the enviroment and its State
+     R: Reward...PI tries to maximize the reward
+     T: Transiction function 
+
+    ->GOAL: have an agent learn an action policy (PI)
+
+    - Q - QTable -
+        . simple table
+            . rows: State
+            . columns: Action
+            . values: score of taking the action for the specific State
+                -> Bellman Equation
+                    . expected long-term reward for a given action
+
+                    Q(s,a) = r + labmda*(max(Q(s',a')))     <-update/learning function of the Q values
+
+                        r -> immediate reward
+                        labmda -> discounted factor
+
+                        -> immediate action from the current action combined with the expected reward from the best (maximum) future action (a') taken at the proceding/future state (s')
+
+
+
+

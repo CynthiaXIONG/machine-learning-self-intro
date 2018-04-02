@@ -3,7 +3,7 @@
 
 --The RL Problem--
  -> S: State of the enviroment
- -> PI: Policy to thatt akes S as input and outputs actions (A)
+ -> PI: Policy to that takes S as input and outputs actions (A)
  -> A: Action, that will in turn affect the enviroment and its State
  -> R: Reward...PI tries to maximize the reward
  -> T: Transiction function 
