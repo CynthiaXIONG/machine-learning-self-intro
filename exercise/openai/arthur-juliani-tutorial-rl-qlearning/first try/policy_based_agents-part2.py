@@ -85,7 +85,8 @@ def do_main():
             ep_history = []
 
             for j in range(max_sim_steps):
-                env.render()
+                if (i % 200 == 0):
+                    env.render()
 
                 #Probabilistically pick an action given our network outputs.
                 a_dist = sess.run(my_agent.output, feed_dict={my_agent.state_in:[s]})

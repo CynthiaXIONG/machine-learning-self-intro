@@ -82,7 +82,7 @@ def do_main():
     inputs1 = tf.placeholder(shape=[1, layer_0_dim], dtype=tf.float32) #inputs are the possible states
     W = tf.Variable(tf.random_uniform([layer_0_dim, output_dim], 0, 0.01))
     
-    with tf.device('/gpu:0'): #'/fpu:0' '/cpu:0' #force GPU/CPU, only for NVidia
+    with tf.device('/cpu:0'): #'/gpu:0' '/cpu:0' #force GPU/CPU, only for NVidia
         Q_out = tf.matmul(inputs1, W)
         predict = tf.argmax(Q_out, 1)
 

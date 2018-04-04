@@ -1,0 +1,11 @@
+numpy
+pandas
+#python-tk    #req for matplotlib
+matplotlib
+scipy
+sklearn
+keras
+tensorflow
+h5py
+pydot
+gym #openai gym

@@ -492,9 +492,9 @@ def main():
 
     #week_1_a()
 
-    #week_2()
+    week_2()
 
-    try_lenet_5_keras()
+    #try_lenet_5_keras()
 
 
 
