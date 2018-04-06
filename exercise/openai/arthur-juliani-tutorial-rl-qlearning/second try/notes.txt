@@ -33,7 +33,7 @@ http://neuro.cs.ut.ee/demystifying-deep-reinforcement-learning/
                             . improve_estimate: = r + gamma * later_rewards ,(gamma[0:1] discount rate, how much we value later rewards )
 
 
-        Problem: Tables dont scale well, get way to big if the state and action space are big
+        Problem: Tables dont scale well, get way to big if the state space is too big
 
         -> SOLUTION: have some way to produce Q-values without a table..A NN that has as input the state and outputs the actions to take. the weights are the  Q-Values that work as a function approximator
 

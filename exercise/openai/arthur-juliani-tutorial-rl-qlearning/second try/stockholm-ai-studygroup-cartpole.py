@@ -33,8 +33,8 @@ def cartpole_qlearning():
     action_size = env.action_space.n
 
     num_state_bins = [1, 1, 6, 3]
-    bins_bounds_low = [env.observation_space.low[0], -0.5, env.observation_space.low[2], -0.5]
-    bins_bounds_high = [env.observation_space.high[0], 0.5, env.observation_space.high[2], 0.5]
+    bins_bounds_low = [env.observation_space.low[0], -0.5, env.observation_space.low[2], -1]
+    bins_bounds_high = [env.observation_space.high[0], 0.5, env.observation_space.high[2], 1]
 
     #print(convert_continuos_state_to_discrete([0,0,2,6], [1,1,2,6], [0,0,0,0], [1,1,2,6]))
 
@@ -44,7 +44,7 @@ def cartpole_qlearning():
     #setup hyperparameters
     lr = 0.8  #learning rate
     gamma = 0.95 #discount rate, how much we value future rewards
-    e = 0.1
+    e = 0.2
     num_episodes = 4000
     num_sim_steps = 500
 
@@ -63,8 +63,8 @@ def cartpole_qlearning():
         #Q-Table learning algorithm
         for j in range(num_sim_steps):
             
-            if (i % 100 == 0):
-                env.render()
+            #if (i % 100 == 0):
+                #env.render()
 
             #Choose action by greedily (with noise) picking from QTable
             a = np.argmax(Q[s, :])
