@@ -1,1 +1,68 @@
 --- Neural Style Transfer ---
+    .notation:
+        . C - content image
+        . S - style image
+        . G - generated image
+    
+    - Understanding the layers in a ConvNet -
+    . paper: Zeiler and Fergus 2013, Visualizing and understanding convolutional networks: https://arxiv.org/abs/1311.2901
+        . What are they learning/doing?
+            . Find the "patches' (input, the filters, for the conv layer) that maximaize the activation of a unit in the first layer (easy to visualize the input). If you represent it, you can get an intuition of what feature it is trying to learn (e.g: diagonal edges).
+            . You can do this for other units and for deeper layer (and always trace back to the input, so yuor patches get bigger!), and deeper layers start detecting more complex features (like faces, wheels, water, etc)
+
+
+    -- Neural Style Transfer --
+        . paper: Gatvs 2015, a neural algorithm of aritisc style: https://arxiv.org/abs/1508.06576
+        . goal: from input content image(C) and style image(S), output and generated image(G0)
+
+        - Cost Function -
+            goal: measure how good a generated image is
+                J_content(C, G) -> measures how similar the content of C and G images are
+                J_style(S, G) -> measures how similar the "style" of C and G images are
+
+                -> J_g(G) = alpha*J_content(C,G) + beta*J_style(S,G)
+                    . alpha, beta: hyperparams, weights of how much style you want
+
+        - Algorithm -
+            i. initialize G randomly (G: 100x100x3)
+            ii. Use graddescent to minimize J_g
+                G:= G - deriv(J_g(G))   -> update the generated image 'G' with the derivative of the cost function
+
+        - Content Cost Function -
+            . if the hidden layer 'l' used to compute content cost:
+                . is too shallow (1), generated image will have pixels very similar to the content image
+                . too deep, generated image will have some complex feature similar to the content image (like the presence of a dog)
+                -> Best is to pick one what is not super shallow, but not deep
+
+            . Use pre-trained ConvNet (e.g:VGG network) to check how similar the G and C images are (similar to the face detection), by comparing the activations of the layer "l"
+                . if a[l][C] is similar to a[l][G], then both images have similar content
+
+                J_content(C,G) = 1/k * ||a[l][C] - a[l][G]||^2   (element wise difference of the unrolled vectors of the activations a[l])
+                    . (1/(4*n_H*n_W*n_C)) * tf.reduce_sum(tf.square(tf.subtract(a_C_unrolled, a_G_unrolled)))
+
+        - Style Cost Function -
+            -> Meaning of the style of an image:
+                . picking a layer "l" to measure the style, the style is the correlation between activations across channels
+                    . "how often a feature exists or not when when another feature is present"
+
+            - Style Matrix -
+                a[l][i,j,k] -> activation at (i,j,k) -> (x_coord, y_coord, chancle)
+
+                for S: G[l]k,k' = sum_h(sum_w(a[l][i,j,k] * a[l][i,j,k']))  -> correlation -> unormalized covariation (G = Gram Matrix)
+                for G: calcuklate the same, for G now, 
+
+                    Gram Matrix = 2d_unrolled_activations * transpose(2d_unrolled_activations)  <- correlation between filters  =  tf.matmul(A, tf.transpose(A))
+                        2d_unrolled_activations dim = n_c x n_h*n_w  ->  tf.transpose(tf.reshape(a_C, [a_C.shape[0].value, a_C.shape[1].value*a_C.shape[2].value, a_C.shape[3].value]))
+ 
+                J_style[l](S,G) = 1 / normalization_constant * ||G[l][S]-G[l][G]||^2    -> (1/(4*((n_H*n_W)**2)*(n_C**2))) * tf.reduce_sum(tf.square(tf.subtract(GS, GG)))
+
+            Better is to combine the style of multiple layers
+            J_style(S,G) = sum_l(lambda[l] * J_style[l](S,G))
+                . lambda[l] is an hyperparam lambda for the weight of the style of a specific layer
+            
+    
+
+
+
+
+
