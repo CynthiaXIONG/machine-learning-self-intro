@@ -1,0 +1,66 @@
+--- Face Recognition ---
+
+    -- Face Verification --
+    . building block for 'k' faces recognition. It only is trained verifies one face (k=1)
+
+        - One Short Learning -
+        . need to train with only ONE traning example (just one picture of the face)
+            . learn from one example to recognize the person
+
+            -> Similiarity Function
+                . train a network to learn a Similiarity function (d(img1, img2) = degree of difference)
+                    . two images as inputs
+                    . d < tao -> pictures are eof the same person
+                        . tao -> hyperparam for threshold of difference
+                . at run time, test all the pairs of images with the new image vs all images of your database. If d<tao then it is a match
+
+                - Siamese Network -
+                    . papers: DeepFace 2014
+                    . have two conv neural networks, that use the same parameters (they are the same)
+                    . their last layer is their encoding layer (Fc-128 for example) -f(x)
+                    . d(x1, x2) = ||f(x1)-f(x2)||2 <- nominal distance between the two encondings vectors
+                    . learn parameters so that:
+                        - if x1 and x2 are of the same person, d is small
+                        - if x1 and x2 are of dfferent persons, d is large
+
+                    ->> Triplet Loss <<--
+                        .paper: FaceNet 2015
+                        . looking at 3 pictures at a time, comparing the anchor with both a positive and a negative example
+                            -anchor picture - a
+                            -positive picture - p
+                            -negative picture - n
+                        . goal:
+                            -||f(a)-f(p)||2 -> to be small and ||f(a)-f(n)||2 -> to be large
+                                - ||f(a)-f(p)||2 < ||f(a)-f(n)||2 == d(a,p) < d(a,n)
+                                - d(a,p) - d(a,n) < alpha 
+                                    . alpha: 'marging' , hyperparam for difference threshold
+
+                        Loss Function:
+                            L(a,p,n) = max(d(a,p)-d(a,n)+alpha, 0)  
+                                -> maximizing this tries to make d(a,p) smaller than d(a.n) because otherwise L will be 0 (because of that max, where the first argument needs to be negative!)
+
+                            cost function, J, is just the same of the losses through the whole traning set:
+                                J  = sum(L(a,p,n))
+
+                    Note: you need several pictures of the same person for traning, to create this a,p and a,n pairs
+                        but for prediction you only need one and do the one-shot-Learning
+
+                    - Choosing the triplets - A,P,N
+                        . if chosen randomly, d(a,p) + alpha <= d(a,n) is very easy to satisfy as they will probably be very different persons
+                        . choose triplets that are "hard" to train
+                            -> that d(a,p) is close to d(a,n), so that the model can train and learn on this more challenging examples
+
+                    Note: the best comercial solutions for face recognition use 10's of millions of traning sets. Usually they have their models available, so for this type of applications is probably better to use this pretraning parameters than to try to train the model from scratch
+
+                - Binary Classification -
+                    . Another way to do Face Recognition besides the triplet losses (that also works quite well)
+                    . use siamese networks, and have the combined encoding vectors stacked and then connected to a single output, when 0 is different and 1 is similar (like binary classification)
+                        another way is instead of stacking the encoding vectors is to combined them in a "diferencial" way, (just f(x1) - f(x2))
+                        -> y_pred = theta*(|f(x1)-f(x2)|)+beta
+
+                Note: for the prediction, because you already computed the encondig vectors for the database pictures, you can just used this values (and store them instead of the picture, using way less memory) and only have to compute/feedforward for the test picture
+
+                            
+
+
+                    
