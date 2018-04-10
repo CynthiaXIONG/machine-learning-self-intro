@@ -1,0 +1,9 @@
+--- RL ---
+
+- Plan -
+    i. Intro
+        - blogpost: https://mpatacchiola.github.io/blog/2016/12/09/dissecting-reinforcement-learning.html
+        - blog2: http://amid.fish/reproducing-deep-rl
+    ii. part4 of prevblog: AC - actor critic - openai gym catpole
+    iii. Implement the following progression: SARSA, LS??, ???, PPO?
+    iv. ?? DeepRL, DeepQNN
