@@ -1,5 +1,4 @@
 import math
-import random
 
 import numpy as np
 import tensorflow as tf
@@ -33,23 +32,28 @@ class QTable():
         self.state_space = state_space
         self.action_space = action_space
         self.lr = learning_rate
-        self.gamma=0.95
+        self.gamma=gamma
         self.epsilon = epsilon
 
-        _initialize_table()
+        self._initialize_table()
         pass
 
-    def _initialize_table():
-        self.Q = np.zeros(state_space, action_space])
+    def _initialize_table(self):
+        self.Q = np.zeros([self.state_space, self.action_space])
 
-    def get_action(s):
-        if np.random.rand(1) < self.epsilon:
-            a = random.randint(0, self.action_space-1)
+    def get_action(self, s, episode=0):
+        '''
+        e = self.epsilon ** (1 + episode/100) #reduce change as episodes go on
+        #Choose action by greedily picking from QTable (with 'epsilon' change of random choice) 
+        if np.random.rand(1) < e:
+            a = np.random.randint(0, self.action_space)
         else:
             a = np.argmax(self.Q[s, :])
         return a
+        '''
+        return np.argmax(self.Q[s, :] + np.random.randn(1, self.action_space)  * (1./(1 + episode)))
         
-    def update_q(s, a, s1, r):
-        max_future_reward = np.max(Q[s1, :])
+    def update_q(self, s, a, s1, r):
+        max_future_reward = np.max(self.Q[s1, :])
         new_estimate = r + self.gamma * max_future_reward
-        Q[s, a] = (1-lr) * Q[s, a] + self.lr * new_estimate
+        self.Q[s, a] = (1 - self.lr) * self.Q[s, a] + self.lr * new_estimate

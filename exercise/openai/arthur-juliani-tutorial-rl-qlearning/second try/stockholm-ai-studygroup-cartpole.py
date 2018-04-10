@@ -5,6 +5,8 @@ import random
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+import rl_utils as rl
+
 #import dynamon
 #proximal policy gradient opmitization
 
@@ -33,19 +35,17 @@ def cartpole_qlearning():
     action_size = env.action_space.n
 
     num_state_bins = [1, 1, 6, 3]
-    bins_bounds_low = [env.observation_space.low[0], -0.5, env.observation_space.low[2], -1]
-    bins_bounds_high = [env.observation_space.high[0], 0.5, env.observation_space.high[2], 1]
+    bins_bounds_low = [env.observation_space.low[0], -1.0, env.observation_space.low[2], -1]
+    bins_bounds_high = [env.observation_space.high[0], 1.0, env.observation_space.high[2], 1]
 
     #print(convert_continuos_state_to_discrete([0,0,2,6], [1,1,2,6], [0,0,0,0], [1,1,2,6]))
 
     #initialize table (zeros)
     Q = np.zeros([np.prod(num_state_bins), action_size])
+    q_table = rl.QTable(np.prod(num_state_bins), action_size)
     
     #setup hyperparameters
-    lr = 0.8  #learning rate
-    gamma = 0.95 #discount rate, how much we value future rewards
-    e = 0.2
-    num_episodes = 4000
+    num_episodes = 1000
     num_sim_steps = 500
 
     #list to store total rewards and steps per episode (debugging)
@@ -63,29 +63,27 @@ def cartpole_qlearning():
         #Q-Table learning algorithm
         for j in range(num_sim_steps):
             
-            #if (i % 100 == 0):
-                #env.render()
+            if (i % 200 == 0):
+                env.render()
 
             #Choose action by greedily (with noise) picking from QTable
-            a = np.argmax(Q[s, :])
-
-            if np.random.rand(1) < e:
-                a = env.action_space.sample()
+            a = q_table.get_action(s, episode=i)
             
             #Get new state and reward
             s1, r, done, _ = env.step(a)
+
+            #improve r
+            r = (math.radians(13) - abs(s1[2])) / math.radians(13)
+
             s1 = convert_continuos_state_to_discrete(s1, num_state_bins, bins_bounds_low, bins_bounds_high)
 
             #Update Q-Table with new knowledge
-            max_future_reward = np.max(Q[s1, :])
-            new_estimate = r + gamma * max_future_reward
-            Q[s, a] = (1-lr) * Q[s, a] + lr * new_estimate
+            q_table.update_q(s=s, a=a, s1=s1, r=r)
 
             r_all += r
             s = s1
 
             if (done):
-                e = 1./((i/50) + 10)
                 break
 
         #register the rewards
@@ -93,7 +91,7 @@ def cartpole_qlearning():
         r_list.append(r_all)
 
         if i % 100 == 0:
-            print(np.mean(r_list[-100:]))
+            print(np.mean(j_list[-100:]))
         
 
     #print score

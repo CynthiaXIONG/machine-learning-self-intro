@@ -1,7 +1,8 @@
 --- Face Recognition ---
 
     -- Face Verification --
-    . building block for 'k' faces recognition. It only is trained verifies one face (k=1)
+    . building block for 'k' faces recognition. It only is trained to verify if one new face picture is of a specific person (k=1)
+    . For face recognition, you do "face verification" with these new picture agains all the pictures in the database (multiple face recognitions)
 
         - One Short Learning -
         . need to train with only ONE traning example (just one picture of the face)
@@ -18,7 +19,7 @@
                     . papers: DeepFace 2014
                     . have two conv neural networks, that use the same parameters (they are the same)
                     . their last layer is their encoding layer (Fc-128 for example) -f(x)
-                    . d(x1, x2) = ||f(x1)-f(x2)||2 <- nominal distance between the two encondings vectors
+                    . d(x1, x2) = ||f(x1)-f(x2)||2 <- nominal distance between the two encondings vectors (element wise difference)
                     . learn parameters so that:
                         - if x1 and x2 are of the same person, d is small
                         - if x1 and x2 are of dfferent persons, d is large

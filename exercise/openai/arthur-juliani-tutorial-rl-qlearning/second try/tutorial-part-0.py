@@ -1,8 +1,14 @@
+import os
 import gym
 import numpy as np
 import random
 import tensorflow as tf
 import matplotlib.pyplot as plt
+
+import rl_utils as rl
+
+# Change dir to this script location
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def q_table():
     #load environment
@@ -154,7 +160,68 @@ def q_nn():
 
     plt.show()
 
+def qtable_from_rlutils():
+        #load environment
+    env = gym.make("FrozenLake-v0")
+
+    #initialize
+    q_table = rl.QTable(env.observation_space.n, env.action_space.n, epsilon=0.3)
+    
+    #setup hyperparameters
+    num_episodes = 2000
+    num_sim_steps = 200    
+
+    #list to store total rewards and steps per episode (debugging)
+    j_list = []
+    r_list = []
+
+    for i in range(num_episodes):
+        #reset env
+        s = env.reset()
+
+        r_all = 0
+        done = False
+
+        #Q-Table learning algorithm
+        for j in range(num_sim_steps):
+            
+            #Choose action by greedily (with noise) picking from QTable
+            #Slowly reduce the random action change as the Q-Table improves
+            a = q_table.get_action(s, episode=i)
+
+            #Get new state and reward
+            s1, r, done, _ = env.step(a)
+
+            #Update Q-Table with new knowledge
+            q_table.update_q(s=s, a=a, s1=s1, r=r)
+
+            r_all += r
+            s = s1
+
+            if (done):
+                break
+        
+        #register the rewards
+        j_list.append(j)
+        r_list.append(r_all)
+
+    #print score
+    print("Q-Table (rl-utils) success rate: " +  str(sum(r_list)/num_episodes) + "%")
+
+    #plot
+    plt.figure(1)
+
+    plt.subplot(211)
+    plt.plot(r_list, linewidth=0.3)
+
+    plt.subplot(212)
+    plt.plot(j_list, linewidth=0.3)
+
+    plt.show()
+
 
 if __name__ == "__main__":
+
     #q_table()
-    q_nn()
+    #q_nn()
+    qtable_from_rlutils()

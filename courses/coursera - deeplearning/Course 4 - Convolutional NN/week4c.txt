@@ -1,0 +1,13 @@
+--- Generalizing Convolutions for 1D and 3D ---
+    . generalzing all the convolutional techniques learned on this cousrse for 2D/images to 1D/3D
+
+    -- 1D --
+    . used for signals, 1d variations over time, time series of a value over time
+    . use 1d filter!
+        14x1 input CONV 5x1filter = 10x1 output (similar to 2D)
+
+        Note: Usually for 1D, it is better to use Recusive NN (next course, #5)
+
+    -- 3D --
+    . filter volumes, and the rest is the same as in 2D!
+    . could be used for movie data (images over time...) -> detect movement!
