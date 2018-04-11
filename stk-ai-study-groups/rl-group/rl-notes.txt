@@ -1,0 +1,72 @@
+---- Dissecting Reinforcement Learning ----
+    .from: https://mpatacchiola.github.io/blog/2016/12/09/dissecting-reinforcement-learning.html
+
+    --- Markov Chain ---
+        -> stochastic processes
+        . Set of possible states: S = {s0, s1, ..., sm}
+        . Initial state: s0
+        . Transition Model: T(s, s')
+            -The future state, s', is determined only by the current/present state, s, (independent from previous states)
+            - T can be defined by a transition matrix, where the values are the probablity of ending up in state s', from the current state s
+            - The initial state of T at k=0 can be extrapolated to determined the k-step transition probablity (by the k-th power of the T)
+                k-step_transition_prob = T^k  (snippet_1 -> rl-notes.py)
+            - The vectors of the matrix represent the probability of staying in that state
+        . Initial distribution: v, state of the system at k=0
+        . The state probability after k-steps = Dot(v, step_transition_prob)
+        . After n-steps the state probablity distribution can converge to equilibrium, independently of the starting distribution (but this not always happens)
+
+    --- Markov Decision Process - MDP ---
+        -> Markov chain based with the inclusion of an Agent and a Decision making process
+        . Set of possible states: S
+        . Initial state: s0
+        . Set of possible actions: A
+        . Transition Model: T(s, a, s')
+        . Reward function: R(s)
+
+        . T represents the probability of reaching s', from s if action 'a' is taken
+        . R is a real value from the agent moving to s0
+
+        -> Problem: maximise the reward, avoind states which return negativas values and choosing the ones which return positive values
+        -> Solution: find the policy PI(s) which return s the action with the highest reward
+
+        . PI* -> optimal poloty, which retuns the highest expected reward/utility
+
+    --- Bellman Equation ---
+    -> problem: how to choose the best policy? how to compare policies?
+    . U: utility is the instant reward from state 's', plus the possible max rewards of future states  (utility is also known as Value)
+        -> Disconted Rewards:  U = R(s0) + γ*R(s1) + γ^2R(s2) + .... + γ^n*R(sn)
+            γ: [0:1] discount factor -> preference of the agnt for the current rewards over future rewards
+        
+        -> Bellman Equation: U(s) = R(s) + γ*max_a(sum(T(s,a,s') * U(s')))
+            . action with the maximum sum of the utility of the possible subsequent states * the probability of getting to those subsequent states s'
+
+        . For 'n' possible states there are 'n' Bellman equations. If the Bellman Eq was linear, this would be easily solved, but it is not (because of the MAX!!)
+            -> Solution is an iterative approach
+
+        -- Value Iteration Algorithm --
+            . the Bellman Eq is the iteration algorithm to solve a MDP
+            . find the utility/value for each state, through an iterative approach
+                i. start with arbitary values (0)
+                ii. Bellman Update: calculate the utility of a state and update it
+                iii. updating will converge to equilibrium (only reached in the inf iteration)
+                iv. stop updating when convergion from one iteration to the next is very small
+                    ||U(k+1) -U(k)|| <  ϵ * (1 - γ) / γ  
+                    . ϵ: stopping criteria value
+                    
+
+        -- Policy Iteration Algorithm --
+            . find the optimal policy that maximizes the reward, PI*
+            . for a given action, a, evaluate this policy utility/value, using the Bellmans Eq (but without the need for iterating the actions to find a max, because we want the utility for a selected "policy action")
+            . policy improvement: improve policy with the action that returns the best utility
+            . 
+
+
+        -- Value VS Policy --
+            . Choose Policy iteration if:
+                -many actions
+                -start from a fair policy
+            . Choose Value:
+                -few actions and transition is acyclic 
+
+
+        
