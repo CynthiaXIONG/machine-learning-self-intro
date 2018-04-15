@@ -43,7 +43,8 @@
         . For 'n' possible states there are 'n' Bellman equations. If the Bellman Eq was linear, this would be easily solved, but it is not (because of the MAX!!)
             -> Solution is an iterative approach
 
-        -- Value Iteration Algorithm --
+        --- Dynamic Programming Algorithms ---
+        -- Value Iteration Algorithm -- snippet_3
             . the Bellman Eq is the iteration algorithm to solve a MDP
             . find the utility/value for each state, through an iterative approach
                 i. start with arbitary values (0)
@@ -54,11 +55,10 @@
                     . ϵ: stopping criteria value
                     
 
-        -- Policy Iteration Algorithm --
+        -- Policy Iteration Algorithm -- snippet_4
             . find the optimal policy that maximizes the reward, PI*
             . for a given action, a, evaluate this policy utility/value, using the Bellmans Eq (but without the need for iterating the actions to find a max, because we want the utility for a selected "policy action")
             . policy improvement: improve policy with the action that returns the best utility
-            . 
 
 
         -- Value VS Policy --
@@ -67,6 +67,34 @@
                 -start from a fair policy
             . Choose Value:
                 -few actions and transition is acyclic 
+    
 
+    --- Model-Free Reinforcement Learning ---
+        . there is no transition model, T
+        . there is no reward function, R(s)
 
+        -- Passive RL --
+        . policy , PI, always produce the action ,a, for the agent to use
+        . The goal of the agent it to learn the Utility function, U
+            -> MC for prediction
+
+        -- Active RL --
+        . estimate the optimal policy while moving in the environment
+            -> MC for control estimation
+
+        i. Transition Model estimation:
+            . take actions in the environment and keep track of the final states and its probablities.
+        ii. Utility Function estimation: 
+            . with the Transition Model available, use value or policy iteration to extimate the utility function
         
+        !problem: Estimating the transitional model can be very expensive (proportional to the state and action space) and some states can be extremely unlikely
+            -> Solution: Monte Carlo Method, which directly estimates the utility function without the need of a transtion model
+
+    --- Monte Carlo Method - MC ---
+        . using randomness to solve porblems
+        . advantages vs dynamic programming:
+            -MC allows learning optimal policy direclty from interaction with environment
+            -easy and efficient to focus MC methods on a small subset of states
+            -MC can be used with simulations (sample models)  -> ability to simulate episodes and use this data
+
+            
