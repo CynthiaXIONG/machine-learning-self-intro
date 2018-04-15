@@ -1,0 +1,6 @@
+--- Recurrent Neural Networks - RNN ---
+    . used for sequence models: speech recognition, natural language processing, music generation, DNA seq analysis, language translation, video recognition
+    . input and/or output is a sequence (can be only one of them)
+
+    - Notation:
+        . 
