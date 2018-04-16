@@ -167,7 +167,7 @@ def snippet_2():
                    1.0, 0.0, 0.0, 0.0]])
 
     #Transition matrix loaded from the cleaning_robot_T.npy file (too big)
-    T = np.load("cleaning_robot_T.npy")
+    T = np.load("mpatacchiola_envs/cleaning_robot_T.npy")
 
     #Utility vector (given, magically calculated =D)
     u = np.array([[0.812, 0.868, 0.918,   1.0,
@@ -194,7 +194,7 @@ def snippet_3():
     graph_list = list() #List containing the data for each iteation
 
     #Transition matrix loaded from the cleaning_robot_T.npy file (too big)
-    T = np.load("cleaning_robot_T.npy")
+    T = np.load("mpatacchiola_envs/cleaning_robot_T.npy")
 
     #Reward vector
     r = np.array([-0.04, -0.04, -0.04,  +1.0,
@@ -238,7 +238,7 @@ def snippet_4():
     gamma = 0.999
     epsilon = 0.0001
     iteration = 0
-    T = np.load("cleaning_robot_T.npy")
+    T = np.load("mpatacchiola_envs/cleaning_robot_T.npy")
 
     #Generate the first policy randomly
     # NaN=Nothing, -1=Terminal, 0=Up, 1=Left, 2=Down, 3=Right
