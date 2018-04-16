@@ -1,6 +1,8 @@
 import os
 import numpy as np
 
+from mpatacchiola_envs.gridworld import GridWorld
+
 ### 1 ###
 def mdp_kstep_transition_prob(T, k):
     return np.linalg.matrix_power(T, k)
@@ -60,6 +62,80 @@ def print_cleaning_robot_policy(p, level_shape):
             counter += 1
         policy_string += '\n'
     print(policy_string)
+
+def print_grid_world_policy(p):
+    """
+    Print the policy actions using symbols:
+    # 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT, NaN=Obstacle, -1=NoAction
+    * terminal states
+    # obstacles
+    """
+    policy_string = ""
+    for row in range(p.shape[0]):
+        for col in range(p.shape[1]):
+            if(p[row, col] == -1): policy_string += " *  "            
+            elif(p[row, col] == 0): policy_string += " ^  "
+            elif(p[row, col] == 1): policy_string += " >  "
+            elif(p[row, col] == 2): policy_string += " v  "           
+            elif(p[row, col] == 3): policy_string += " <  "
+            elif(p[row, col] == -2): policy_string += " #  "
+            elif(np.isnan(p[row, col])): policy_string += " #  "
+        policy_string += '\n'
+    print(policy_string)
+
+def setup_34_gridworld():
+    # The world has 3 rows and 4 columns
+    env = GridWorld(3, 4)
+    # Define the state matrix
+    # Adding obstacle at position (1,1)
+    # Adding the two terminal states
+    state_matrix = np.zeros((3,4))
+    state_matrix[0, 3] = 1
+    state_matrix[1, 3] = 1
+    state_matrix[1, 1] = -1
+    # Define the reward matrix
+    # The reward is -0.04 for all states but the terminal
+    reward_matrix = np.full((3,4), -0.04)
+    reward_matrix[0, 3] = 1
+    reward_matrix[1, 3] = -1
+    # Define the transition matrix
+    # For each one of the four actions there is a probability
+    transition_matrix = np.array([[0.8, 0.1, 0.0, 0.1],
+                                  [0.1, 0.8, 0.1, 0.0],
+                                  [0.0, 0.1, 0.8, 0.1],
+                                  [0.1, 0.0, 0.1, 0.8]])
+
+    # Set the matrices 
+    env.setStateMatrix(state_matrix)
+    env.setRewardMatrix(reward_matrix)
+    env.setTransitionMatrix(transition_matrix)
+
+    return env
+
+def get_mc_state_return(state_list, gamma):
+    #state_list is type (position, reward)
+    ret_value = 0
+    for i in range(len(state_list)):
+        reward = state_list[i][1]
+        ret_value += reward * np.power(gamma, i)
+    return ret_value
+
+def get_mc_control_state_return(state_list, gamma):
+    #state_list is type (position, action, reward)
+    ret_value = 0
+    for i in range(len(state_list)):
+        reward = state_list[i][2]
+        ret_value += reward * np.power(gamma, i)
+    return ret_value
+
+def mc_control_update_policy(episode_list, policy_matrix, q_matrix):
+    #q_matrix = state_action_matrix
+    for visit in episode_list:
+        observation = visit[0]
+        col = observation[1] + (observation[0]*4) #convert to vector
+        if(policy_matrix[observation[0], observation[1]] != -1):
+            policy_matrix[observation[0], observation[1]] = np.argmax(q_matrix[:, col])
+    return policy_matrix
 
 def snippet_1():
     #Declaring the initial distribution
@@ -211,6 +287,171 @@ def snippet_4():
     print_cleaning_robot_policy(p, level_shape=(3,4))
     print("===================================================")
 
+def snippet_5():
+    env = setup_34_gridworld()
+
+    #Reset the environment
+    observation = env.reset()
+    #Display the world printing on terminal
+    env.render()
+    # Define the policy matrix
+    # 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT, NaN=Obstacle, -1=NoAction
+    # This is the optimal policy for world with reward=-0.04
+    policy_matrix = np.array([[1,      1,  1,  -1],
+                              [0, np.NaN,  0,  -1],
+                              [0,      3,  3,   3]])
+
+    for _ in range(1000):
+        action = policy_matrix[observation[0], observation[1]]
+        observation, reward, done = env.step(action)
+        print("")
+        print("ACTION: " + str(action))
+        print("REWARD: " + str(reward))
+        print("DONE: " + str(done))
+        env.render()
+        if done: break
+
+def snippet_6():
+    env = setup_34_gridworld()
+    #Reset the environment
+    observation = env.reset()
+
+    # Define the policy matrix
+    # 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT, NaN=Obstacle, -1=NoAction
+    # This is the optimal policy for world with reward=-0.04
+    policy_matrix = np.array([[1,      1,  1,  -1],
+                              [0, np.NaN,  0,  -1],
+                              [0,      3,  3,   3]])
+
+    # Defining an empty utility matrix
+    utility_matrix = np.zeros((3,4))
+    # init with 1.0e-10 to avoid division by zero
+    running_mean_matrix = np.full((3,4), 1.0e-10)
+    
+    gamma = 0.999 #discount factor
+    nof_epochs = 50000
+    print_epoch = 1000
+    nof_steps = 100
+
+    for epoch in range(nof_epochs):
+        #Starting a new episode
+        episode_list = list()
+        #Reset and return the first observation
+        observation= env.reset(exploring_starts=False)
+
+        for _ in range(nof_steps):
+            # Take the action from the policy matrix
+            action = policy_matrix[observation[0], observation[1]]
+            # Move one step in the environment and get obs and reward
+            observation, reward, done = env.step(action)
+            # Append the visit in the episode list
+            episode_list.append((observation, reward))
+            if done: break
+        
+        # The episode is finished, now estimating the utilities
+        # Checkup to identify if it is the first visit to a state -> First Visit MC
+        checkup_matrix = np.zeros((3,4))
+        # This cycle is the implementation of First-Visit MC.
+        # For each state stored in the episode list it checks if it
+        # is the first visit and then estimates the return.
+        visit_i = 0
+        for visit in episode_list:
+            observation = visit[0] #observation is tuple(row, col)
+            reward = visit[1]
+
+            if (checkup_matrix[observation[0], observation[1]] == 0):
+                ret_value = get_mc_state_return(episode_list[visit_i:], gamma)
+                running_mean_matrix[observation[0], observation[1]] += 1
+                utility_matrix[observation[0], observation[1]] += ret_value
+                checkup_matrix[observation[0], observation[1]] = 1
+            
+            visit_i += 1
+        
+        if (epoch % print_epoch == 0):
+            print("Utility matrix after " + str(epoch+1) + " iterations:") 
+            print(utility_matrix / running_mean_matrix)
+    
+    #Time to check the utility matrix obtained
+    print("Utility matrix after " + str(nof_epochs) + " iterations:")
+    print(utility_matrix / running_mean_matrix)
+
+def snippet_7():
+    env = setup_34_gridworld()
+    #Reset the environment
+    observation = env.reset()
+
+    # Random policy matrix
+    policy_matrix = np.random.randint(low=0, high=4,size=(3, 4)).astype(np.int32)
+    policy_matrix[1,1] = -2 #-2 for the obstacle at (1,1)
+    policy_matrix[0,3] = policy_matrix[1,3] = -1 #No action (terminal states)
+
+    # Q/State-action matrix (init to zeros or to random values)
+    q_matrix = np.random.random_sample((4,12)) # Q
+
+    # init with 1.0e-10 to avoid division by zero
+    running_mean_matrix = np.full((4,12), 1.0e-10)
+
+    gamma = 0.999 #discount factor
+    nof_epochs = 50000
+    print_epoch = 1000
+    nof_steps = 100
+
+    for epoch in range(nof_epochs):
+        #Starting a new episode
+        episode_list = list()
+        #Reset and return the first observation
+        observation= env.reset(exploring_starts=True)
+
+        for i in range(nof_steps):
+            # Take the action from the action matrix
+            action = policy_matrix[observation[0], observation[1]]
+
+            if (i == 0): #inital step, take random action (exploring starts)
+                action = np.random.randint(0, 4)
+
+            # Move one step in the environment and gets 
+            # a new observation and the reward
+            new_observation, reward, done = env.step(action)
+
+            #Append the visit in the episode list
+            episode_list.append((observation, action, reward))
+            observation = new_observation
+            if done: break
+        
+         # The episode is finished, now estimating the utilities
+        checkup_matrix = np.zeros((4,12))
+        visit_i = 0
+        # This cycle is the implementation of First-Visit MC.
+        # For each state-action stored in the episode list it checks if 
+        # it is the first visit and then estimates the return. 
+        # This is the Evaluation step of the GPI.
+        for visit in episode_list:
+            observation = visit[0]
+            action = visit[1]
+            col = observation[1] + (observation[0] * 4)
+            row = action
+            if (checkup_matrix[row, col] == 0):
+                return_value = get_mc_control_state_return(episode_list[visit_i:], gamma)
+                running_mean_matrix[row, col] += 1
+                q_matrix[row, col] += return_value
+                checkup_matrix[row, col] = 1
+            visit_i += 1
+
+        # Policy Update (Improvement)
+        policy_matrix = mc_control_update_policy(episode_list,  policy_matrix, q_matrix/running_mean_matrix)
+
+        # Printing
+        if(epoch % print_epoch == 0):
+            print("")
+            print("Q matrix after " + str(epoch+1) + " iterations:") 
+            print(q_matrix / running_mean_matrix)
+            print("Policy matrix after " + str(epoch+1) + " iterations:") 
+            print(policy_matrix)
+            print_grid_world_policy(policy_matrix)
+    
+    # Time to check the utility matrix obtained
+    print("Q " + str(nof_epochs) + " iterations:")
+    print(q_matrix / running_mean_matrix)
 
 def main():
     # Change dir to this script location
@@ -219,7 +460,10 @@ def main():
     #snippet_1()
     #snippet_2()
     #snippet_3()
-    snippet_4()
+    #snippet_4()
+    #snippet_5()
+    #snippet_6()
+    snippet_7()
 
 if __name__ == "__main__":
     main()

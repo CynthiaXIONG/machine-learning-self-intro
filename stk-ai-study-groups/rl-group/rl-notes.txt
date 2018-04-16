@@ -97,4 +97,52 @@
             -easy and efficient to focus MC methods on a small subset of states
             -MC can be used with simulations (sample models)  -> ability to simulate episodes and use this data
 
+        . peseudo-algorithm of MC Prediction - Passive:
+            . transitional 
+            i. start from initial state and follow internal policy
+            ii. store history of all states visited untill reaching terminal state -> Episode
+            iii. calulate the U based on the bellmans discounted reward in each state
+            iv. iterate untill convergion!! (NOTE: It is garanteed to converge)
+
+        . visit: each occurence of state during the episodes
+        -> First Visit MC: U(s) is the avg of the utiliy following the FIRST visit to 's' in a set of episodes
+        -> Every Visit MC: U(s) is the avg of EVERY/ALL visits to 's'
+
+        . The MC method can happen to never reach certain states. This can be an advantage as we will only estimate the utilities, U, for the states we are interested in
+            -> rl_notes.py, snippet_6 with exploring_starts=False
+                For this cause, this is solved by starting at random places to make sure all states are reached
+        
+
+        -- Monte Carlo Control - Active --
+            . policy is not given, so need to be estimated
+            . similar to the dynamic programming approach: Policy iteration
+                -> GPI - Generalized Policy Iteration
+                    i. Policy evaluation: U -> U(PI) (get utility based on action given by the policy PI)
+                    ii. Policy Improvement: PI -> greedy(U) (update the policy for a state based on the best action)
+                        -> greedy algorithm: local optimal is chosen at each step of the iteration, but because the choice is based on the utility function, U, which is adjusted along time it will not bu stuck in local optimals, as these will change
+
+            
+            - Q-Function <-> Action-Value Function -
+                . takes the action 'a' in state 's' under policy 'PI' and returns the utility of that state-action pair
+                -> primary goal of MC Control: estimate Q
+                    . State-Actio matrix Q, stores the utility of executing a specific action in a specific state
+                    . Query along the actions of a state should give us the policy (choose the highest utility action, greedly)
+                        PI(s) = argmax Q(s,a)
+                        . This might lead to not exploring diferent actions when the table starts to get updated (if Q values are default to 0, and update starting adding some positive values, those will be selected instead of the unknown action,state with Q=0)
+
+                        -Solution: Exploring starts
+                            . make sure the first step of each eosode starts at a state-action pair where all possible actions have a non-zero probability
+
+                        rl-notes.py -> snippet_7
+
+                ->> MC always converges to Optimal Policy
+                    . when it is convergint to a sub-optimal policy, the utility function would converge to the utility function for that policy and that would cause the policy to change
+                    . Stability is only reached when BOTH Policy and Utility functions are optimal
+
+                . Having to save a full epsiode before updating/learning is a strong limitation
+                    -> Temporal Differencing Learning (TD) overcomes this by updating after a single step 
+                    
+
+
+
             
