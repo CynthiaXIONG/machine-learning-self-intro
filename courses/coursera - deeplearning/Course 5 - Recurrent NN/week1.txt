@@ -3,4 +3,76 @@
     . input and/or output is a sequence (can be only one of them)
 
     - Notation:
-        . 
+        . x<1>, input word at position 1
+        . x<t>, input at position 't' (temporal)
+        . y<t>, output element 't' from output sequence
+        . x(i)<t>, input at position 't' of traning example 'i' 
+        . Tx, input sequence length
+        . Ty, output sequence length
+        . Tx(i), input sequence length if example 'i' (length can differ between examples)
+
+        - How to Represent words in a NLP problem -
+            -> vocabulary/dictionary
+                . list of all the possible words
+                . For a typical NLP apps, dictionary sizes are typically 10.000-100.000 (in extreme cases 1.000.000) of the most common words
+                -> One-Hot representation: use the index of the word to represent the word (in a one-hot representation)
+                . use an special 'token' for unknown words that you find (all words not in the dic will have the last index value)
+
+    -- Recurrent Nerual Network Model --
+        . why not use a standard network?
+            . inputs and outputs can have diffwerent lengths in different examples
+            . doesnt share features learned across different positions of text (we need something like convolutions)
+            . without feature sharing, network would require an unfeasable number of inputs/outputs
+
+        - RNN Model -
+            . input just one word (x<i>) to the model that outputs just one element of the output seq y<i>.
+            . for the next work x<i+1>, feed the activations from the previous element in the model a<i>
+            . for the next steps, keep this chain of feeding the activations of the prev elements
+            . the parameters are always the same for every element (bc the model is the same)
+
+            ->this model has the problem of only using learnings/information from previous elements and not from the procceding ones
+                . Solved with Bidirectional RNN (BRNN)
+            
+            - RNN Forward Prop -
+                . start from the first element, to calc a<1> and  and therefore calculating the other consecutive elemeents
+                a<0> = zeros (initial vector)
+                a<1> = g(Waa*a<0> + Wax*x<1> + ba)   <- usual g(z), activation function is tanh/ReLU
+                y^<1> = g(Wya*a<1> + by)  <- usual g(z), sigmoid (if 01), softmax (if many classes)
+
+                a<t> = g(Waa*a<t-1> + Wax*x<t> + ba)   | y^<t> = g(Wya*a<t> + by)
+                a<t> = g(Wa * [a<t-1>, x<t>] + ba)     <- Wa = [Waa, Wax]  (stack both matrices horizontaly)    :   [a<t-1>, x<t>] (stacked vertically   ->>> matmul of those will be the same result the Eq above, but simplifies notation as we only have 1 parameter matrix Wa)
+
+            - RNN Back Prop -
+                . element wise Loss function (logistic regression loss -> cross-entropy loss)
+                    . loss associated with a single prediction, for a singular time step, t
+                    . L<t>(y^<t>, y<t>) = -y<t>*log(y^<t>) - (1-y<t>)*log(1-y^<t>)
+                
+                -> Overall Loss L:
+                    L(y^, y) = sum_t(L<t>(y^<t>, y<t>))
+                . sum of the individual element losses
+
+                - Backpropagation through time -
+                    . Backprop is done start at the last element and going back (opposite direction of forward prop)
+
+            -- RNN Architectures --
+
+                1) Many-to-Many
+                    . Tx = Ty
+                    . Tx != Ty
+                        -> e.g: Machine translation
+                        . Enconder part: forward feed where X's are inputed but no y^ is predicted, just passed the activations further in the chain
+                        . Decoder part: forward feed where no X's are inputed, but y^ are outputted. The chain of activation feed from the previous elements is maintained through all of the output elements
+
+                2) Many-to-One
+                    . e.g: Sentiment classification (rating a text from 1-5)
+                        . Ty = 1
+
+                3) One-to-Many
+                    . e.g: Music Generation , Y is seq of notes
+                    . output of previous element is the input of the next element (after the initial element ofc)
+
+                
+
+
+
+
