@@ -140,9 +140,131 @@
                     . Stability is only reached when BOTH Policy and Utility functions are optimal
 
                 . Having to save a full epsiode before updating/learning is a strong limitation
+                    . This could be a serious issue if episodes can take very long to be completed or never end (cycles!!)
                     -> Temporal Differencing Learning (TD) overcomes this by updating after a single step 
                     
 
+    --- Temporal Differencing (TD) ---
+    . Update the utility function, U, after each visit
+        -> results in not having all the states and their 'utility' values
+        -> the only available information is r(t+1) and the U estimated for the future step, t+1
+
+        -- TD(0) --
+            . simplest form of the TD learning
+            . passive learning -> model-free prediction -> utility function prediction
+
+            Update Rule: U(s_t) = U(s_t) + alpha(r_t+1 + gamma*U(s_t+1) - U(s_t))
+                -> alpha = learning rate or step size [0-1], how much to update the new utility based on the estimation error of the U_t+1
+                    -> New Estimate = Old_estimate + alpha*(Target - Old_estimate)
+
+            -> TD(0) ignores the past states, just takes into accound the current state
+            -> implementation: snippet_8
+
+        -- TD(labmda) --
+            . extend the utility_matrix update, with the new state, t+1, estimation 'learning' to more of the precceding states than just the current state (TD(0))
+            . updates the utility_matrix way faster than TD(0), bc TD can only propagate the learning by one state at a time per step
+                -->> CONVERGES FASTER!!
+
+            . short-term 'memory' of states visited in the last step -> trace_matrx
+            . labmda -> trace decay, defines the 'weight' of each state visited before
+                -> labmda = 0, prev states are not taken into account, TD(0)
+                -> labmda = [0-1], weight of the traces decay over time, giving more weight to the last states
+                -> labmda = 1, all precceding states are equally updated
+                    . this one is kind of similar to the MC method as it updates all the states (but with updates after every step and not only after the epsiode is done)
+
+            - Update Rule -
+                . U_t(s) = U_t(s) + alpha * delta
+                . delta = delta_TD(0) * e_t(s)     
+
+                . e_t(s) -> trace matrix
+                . e_t(s) = gamma * labmda * e_t-1(s)
+
+                -> implementation: snippet_9
+
+    --- SARSA: Temporal Differencing Control ---
+        -> Extending TD(0) to active learning -> control case -> optimal policy estimation
+            -> Use Q-function to esmate best policy (very similar to TD(0) update rule)
+
+            Q(s_t, a_t) += alpha * (r_t+1 + gamma*(Q(s_t+1, a_t+1) - Q(s_t, a_t)))
+
+                . The difference is that for Q needs the tuple [state, action] (while U is only a function of 's')
+                    -> Need to predict the best future action, a_t+1, which we can select from the current policy PI(s_t+1)
+
+             RARSA -> TD control estimation is based on tuple [State0, Actiom0, Reward, State1, Action1]
+
+        - Algorithm -
+            i. move one step by selection action, a_t, from policy, PI(s)
+            ii. get the new state, s_t+1, reward and select the associated action, a_t+1 from PI(s_t+1)
+            iii. update the Q-function
+            iv. Update the policy, PI(s), by greedy selection of the action corresponding to the Q(s, a) that has the highest value (upadte at each step)
+
+            -> implementation: snippet_10
+
+        -- SARSA(labmda) --
+            . we can use the same algorithm as in TD(labmda) to speed the convergence
+            . Uses the eligibility traces to propagate the learning and update the Q of the states previously visited (with the decaying factor)
+
+            ->  Q(s_t, a_t) += alpha * alpha * delta * trace_matrix
+
+        . SARSA always converges to the optimal policy if all the state-action pairs are visited an infinite number of times
+        . The infinte issue can be tackled by using random exploration!
+            -> Epsilon: probability of chosing random action
+                . if epsilon is too high the convergion will be slow because of over exploration
+                . too low can fail to garantee that every state-action pairs will be visited/tested
+
+    --- Q-Learning: Off-policy ---
+        . on-policy learning: use PI policy to learn on the fly, updating PI from experiences sampled from PI (previous TD methods)
+        . off-policy learning: no need for PI to update Q
+            -> learning by observation
+                . learn optimal policy from exploratory policy
+                . allow re-using old experiences generated from old policies to improved current policy
+                    -> Experience Relay!
+
+        - Update Rule -
+            . similar to SARSA but the 'target'/'new state estimation' is not based off the Q of the action, a_t+1, for s_t+1 given by current policy (does not follow the Generalized Policy Iteration algorithm/cycle)
+                -> estimation is based on the max possible Q for state s_t+1
+                    . the estimation does not follow a policy -> off policy, and instead try to use the best possible action, a_t+1, for the estimation
+
+                . exploration policy, PI(s_t+1) = argmax Q(s_t+1, a) or random action
+
+                -> Target/Estimation = r_t+1, gamma * max_a Q(s_t+1, a)
+
+        - Algorithm -
+            i. move one step, selecting a_t from the exploration policy, PI
+            ii. observe r_t+1, s_t+1
+            iii. update the q_matrix
+
+            -> Q-Learning updates q_matrix with the tuple [s0, a0, r, s1]
+                . a1 is not considered (unlike SARSA)
+
+        - Q(labmda)-Learning -
+            . based on the eligibility trace matrix, similar to TD(labmda) and SARSA(labmda)
+            . because of the exploration policy, don't propagate the Q update to the previous states if the action used was the random exploration one
+                . trace_matrix = labmda * gamma * trace_matrix only if Q_t-1 = max_a Q_t-1    
+                    otherwise = 0
+
+            -> cutting off traces when exploratory non-greedy action is taken loses much of advantages of the eligibility lambda trace (faster convergence)
+    
+    Conclusion: TD methods converge faster than MC methods!
+        
+
+
+
+
+                
+
+
+            
+
+
+
+
+
+
+            
+
+
+        
 
 
             

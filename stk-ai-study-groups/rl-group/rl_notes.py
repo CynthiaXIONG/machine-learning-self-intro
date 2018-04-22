@@ -1,7 +1,9 @@
 import os
 import numpy as np
 
+import rl_agents
 from mpatacchiola_envs.gridworld import GridWorld
+
 
 ### 1 ###
 def mdp_kstep_transition_prob(T, k):
@@ -83,6 +85,28 @@ def print_grid_world_policy(p):
         policy_string += '\n'
     print(policy_string)
 
+def print_grid_world_policy_v2(p, level_shape):
+    """
+    Print the policy actions using symbols:
+    ^, v, <, > up, down, left, right
+    * terminal states
+    # obstacles
+    """
+    counter = 0
+    policy_string = ""
+    for row in range(level_shape[0]):
+        for col in range(level_shape[1]):
+            if(p[counter] == -1): policy_string += " *  "            
+            elif(p[counter] == 0): policy_string += " ^  "
+            elif(p[counter] == 1): policy_string += " >  "
+            elif(p[counter] == 2): policy_string += " v  "           
+            elif(p[counter] == 3): policy_string += " <  "
+            elif(p[row, col] == -2): policy_string += " #  "
+            elif(np.isnan(p[counter])): policy_string += " #  "
+            counter += 1
+        policy_string += '\n'
+    print(policy_string)
+
 def setup_34_gridworld():
     # The world has 3 rows and 4 columns
     env = GridWorld(3, 4)
@@ -111,6 +135,9 @@ def setup_34_gridworld():
     env.setTransitionMatrix(transition_matrix)
 
     return env
+
+def grid34_col_row_hash(col, row):
+    return row + col*4
 
 def get_mc_state_return(state_list, gamma):
     #state_list is type (position, reward)
@@ -384,7 +411,7 @@ def snippet_7():
     policy_matrix = np.random.randint(low=0, high=4,size=(3, 4)).astype(np.int32)
     policy_matrix[1,1] = -2 #-2 for the obstacle at (1,1)
     policy_matrix[0,3] = policy_matrix[1,3] = -1 #No action (terminal states)
-
+   
     # Q/State-action matrix (init to zeros or to random values)
     q_matrix = np.random.random_sample((4,12)) # Q
 
@@ -393,7 +420,7 @@ def snippet_7():
 
     gamma = 0.999 #discount factor
     nof_epochs = 50000
-    print_epoch = 1000
+    print_epoch = 5000
     nof_steps = 100
 
     for epoch in range(nof_epochs):
@@ -453,6 +480,239 @@ def snippet_7():
     print("Q " + str(nof_epochs) + " iterations:")
     print(q_matrix / running_mean_matrix)
 
+def snippet_7_using_agent():
+    np.random.seed(1)
+    env = setup_34_gridworld()
+    nof_epochs = 50000
+    nof_steps = 100
+    state_hash_f = lambda s : s[1] + (s[0] * 4)
+    exploration_function = lambda i : np.random.rand(1) < (1./((i/100) + 1))
+    mc_agent = rl_agents.MonteCarloControlAgent(observation_space=[4, 3*4], hash_s_function=state_hash_f, exploration_function=exploration_function)
+
+    for epoch in range(nof_epochs):
+        #Reset the environment
+        s0 = env.reset(exploring_starts=False)
+        mc_agent.initialize_epoch()
+
+        mc_agent.execute_epoch(nof_steps, env, s0)
+
+        # Printing
+        if(epoch % 5000 == 0):
+            print("")
+            print("Q matrix after " + str(epoch+1) + " iterations:") 
+            print(mc_agent.get_mean_return_matrix())
+            print("Policy matrix after " + str(epoch+1) + " iterations:") 
+            print(mc_agent.policy_matrix)
+            print_grid_world_policy_v2(mc_agent.policy_matrix, level_shape=(3,4))
+    
+    # Time to check the utility matrix obtained
+    print("Q " + str(nof_epochs) + " iterations:")
+    print(mc_agent.get_mean_return_matrix())
+
+def td0_get_prediction_delta(utility_matrix, s, s1, r, alpha, gamma):
+    u_t0 = utility_matrix[s[0], s[1]] #old estimation
+    u_t1 = utility_matrix[s1[0], s1[1]] #new estimation
+
+    new_estimation = r + gamma * u_t1
+    return new_estimation - u_t0
+
+def td0_update_utility(utility_matrix, s, s1, r, alpha, gamma):
+    utility_matrix[s[0], s[1]] += alpha * td0_get_prediction_delta(utility_matrix, s, s1, r, alpha, gamma)
+    return utility_matrix
+
+def snippet_8():
+    #TD0 utility matrix estimation
+    np.random.seed(1)
+    env = setup_34_gridworld()
+
+    #Predefine the policy matrix
+    #This is the optimal policy for world with reward=-0.04
+    policy_matrix = np.array([[1,      1,  1,  -1],
+                              [0, np.NaN,  0,  -1],
+                              [0,      3,  3,   3]])
+
+    #initialize utility matrix
+    utility_matrix = np.zeros([3, 4])
+    #hyperparams
+    gamma = 0.999
+    alpha = 0.1 #constant step size
+    nof_epochs = 300000
+    nof_steps = 1000
+    print_epoch = 10000
+
+    for epoch in range(nof_epochs):
+        s0 = env.reset(exploring_starts=False)
+
+        for step in range(nof_steps):
+            #Take the action from the action matrix
+            a = policy_matrix[s0[0], s0[1]]
+            #Move one step in the enviroment and get the new state and reward
+            s1, reward, done = env.step(a)
+            #update the utility matrix
+            utility_matrix = td0_update_utility(utility_matrix, s0, s1, reward, alpha, gamma)
+
+            s0 = s1
+            if done: break
+
+        if(epoch % print_epoch == 0):
+            print("")
+            print("Utility matrix after " + str(epoch+1) + " iterations:") 
+            print(utility_matrix)
+
+    #Time to check the utility matrix obtained
+    print("Utility matrix after " + str(nof_epochs) + " iterations:")
+    print(utility_matrix)
+
+def td_lambda_update_utility(utility_matrx, trace_matrix, alpha, delta):
+    utility_matrx += alpha * delta * trace_matrix
+    return utility_matrx
+
+def td_lambda_update_eligibility(trace_matrix, gamma, _labmda):
+    trace_matrix *= gamma * _labmda
+    return trace_matrix
+
+def snippet_9():
+    #TD(lamda) prediction trace
+    np.random.seed(1)
+    env = setup_34_gridworld()
+
+    #Predefine the policy matrix
+    #This is the optimal policy for world with reward=-0.04
+    policy_matrix = np.array([[1,      1,  1,  -1],
+                              [0, np.NaN,  0,  -1],
+                              [0,      3,  3,   3]])
+
+    #initialize utility matrix
+    utility_matrix = np.zeros([3, 4])
+    trace_matrix = np.zeros([3, 4])
+
+    #hyperparams
+    gamma = 0.999
+    alpha = 0.1 #constant step size
+    _lambda = 0.5 #decaying factor
+    nof_epochs = 300000
+    nof_steps = 1000
+    print_epoch = 10000
+
+    for epoch in range(nof_epochs):
+        s0 = env.reset(exploring_starts=False)
+
+        for step in range(nof_steps):
+            #Take the action from the action matrix
+            a = policy_matrix[s0[0], s0[1]]
+            #Move one step in the enviroment and get the new state and reward
+            s1, reward, done = env.step(a)
+             #Adding +1 in the trace matrix for the state visited
+            trace_matrix[s0[0], s0[1]] += 1
+            
+            #update the utility matrix
+            prediction_delta = td0_get_prediction_delta(utility_matrix, s0, s1, reward, alpha, gamma)
+            utility_matrix = td_lambda_update_utility(utility_matrix, trace_matrix, alpha, prediction_delta)
+            #update the trace matrix (decaying)
+            trace_matrix  = td_lambda_update_eligibility(trace_matrix, gamma, _lambda)
+
+            s0 = s1
+            if done: break
+
+        if(epoch % print_epoch == 0):
+            print("")
+            print("Utility matrix after " + str(epoch+1) + " iterations:") 
+            print(utility_matrix)
+
+    #Time to check the utility matrix obtained
+    print("Utility matrix after " + str(nof_epochs) + " iterations:")
+    print(utility_matrix)
+
+def sarsa_get_q_prediction_delta(q_matrix, s0, s1, a0, a1, r, gamma):
+    q_t0 = q_matrix[a0, grid34_col_row_hash(s0[0], s0[1])] #old estimation
+    q_t1 = q_matrix[a1, grid34_col_row_hash(s1[0], s1[1])]
+
+    new_estimation = r + gamma * q_t1
+
+    return new_estimation - q_t0
+
+def sarsa_update_q_matrix(q_matrix, s0, s1, a0, a1, r, alpha, gamma):
+    q_matrix[a0, s0] += alpha * sarsa_get_q_prediction_delta(q_matrix, s0, s1, a0, a1, r, gamma)
+    return q_matrix
+
+def sarsa_update_policy(policy_matrix, q_matrix, s):
+    #greedy action
+    s_hashed = grid34_col_row_hash(s[0], s[1])
+    action = np.argmax(q_matrix[:, s_hashed]) # best action
+    policy_matrix[s[0], s[1]] = action
+    return policy_matrix
+
+def sarsa_get_greedy_epsilon_action(policy_matrix, s, epsilon=0.1):
+    action = policy_matrix[s[0], s[1]]
+    if (np.random.rand(1) < epsilon):
+        action = np.random.randint(0, int(np.nanmax(policy_matrix) + 1)) #random action
+
+    return action
+
+def sarsa_return_decayed_value(starting_value, global_step, decay_step):
+    decay_value = starting_value * np.power(0.1, (global_step/decay_step))
+    return decay_value
+
+def snippet_10():
+    #TD Control SARSA
+    np.random.seed(1)
+    env = setup_34_gridworld()
+
+    #Random initial  policy
+    policy_matrix = np.random.randint(low=0, high=4, size=(3, 4)).astype(np.int32)
+    policy_matrix[1,1] = -2 #NaN/-2 for the obstacle at (1,1)
+    policy_matrix[0,3] = policy_matrix[1,3] = -1 #No action for the terminal states
+    print("Policy Matrix:")
+    print(policy_matrix)
+
+    #Q matrix initialization
+    q_matrix = np.zeros([4, 3*4])
+
+    gamma = 0.999
+    alpha = 0.001
+    nof_epochs = 5000000
+    nof_steps = 1000
+    print_epoch = 10000
+
+    for epoch in range(nof_epochs):
+        epsilon = sarsa_return_decayed_value(0.1, epoch, decay_step=nof_epochs)
+        s0 = env.reset(exploring_starts=False)
+        is_starting = True
+
+        for step in range(nof_steps):
+            #get greedy action
+            action = sarsa_get_greedy_epsilon_action(policy_matrix, s0, epsilon)
+            if (is_starting):
+                action = np.random.randint(0, 4)
+                is_starting = False
+            
+            s1, r, done = env.step(action)
+            new_action = policy_matrix[s1[0], s1[1]]
+            
+            #update q_matrix
+            q_matrix = sarsa_update_q_matrix(q_matrix, s0, s1, action, new_action, r, alpha, gamma)
+
+            #update policy
+            policy_matrix = sarsa_update_policy(policy_matrix, q_matrix, s0)
+
+            s0 = s1
+            if done: break
+
+        if(epoch % print_epoch == 0):
+            print("")
+            print("Epsilon: " + str(epsilon))
+            print("Q matrix after " + str(epoch+1) + " iterations:") 
+            print(q_matrix)
+            print("Policy matrix after " + str(epoch+1) + " iterations:") 
+            print_grid_world_policy(policy_matrix)
+
+    #Time to check the utility matrix obtained
+    print("Q matrix after " + str(nof_epochs) + " iterations:")
+    print(q_matrix)
+    print("Policy matrix after " + str(nof_epochs) + " iterations:")
+    print_policy(policy_matrix)
+
+
 def main():
     # Change dir to this script location
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -463,7 +723,12 @@ def main():
     #snippet_4()
     #snippet_5()
     #snippet_6()
-    snippet_7()
+    #snippet_7()
+    #snippet_7_using_agent()
+    #snippet_8()
+    #snippet_9()
+    snippet_10()
+
 
 if __name__ == "__main__":
     main()
