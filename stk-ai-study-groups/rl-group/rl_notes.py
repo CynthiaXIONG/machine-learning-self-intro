@@ -101,7 +101,7 @@ def print_grid_world_policy_v2(p, level_shape):
             elif(p[counter] == 1): policy_string += " >  "
             elif(p[counter] == 2): policy_string += " v  "           
             elif(p[counter] == 3): policy_string += " <  "
-            elif(p[row, col] == -2): policy_string += " #  "
+            elif(p[counter] == -2): policy_string += " #  "
             elif(np.isnan(p[counter])): policy_string += " #  "
             counter += 1
         policy_string += '\n'

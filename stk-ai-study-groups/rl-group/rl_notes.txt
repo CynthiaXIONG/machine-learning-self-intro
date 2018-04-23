@@ -216,7 +216,7 @@
         . on-policy learning: use PI policy to learn on the fly, updating PI from experiences sampled from PI (previous TD methods)
         . off-policy learning: no need for PI to update Q
             -> learning by observation
-                . learn optimal policy from exploratory policy
+                . learn optimal policy from sub-optimal policy (could be a random one)
                 . allow re-using old experiences generated from old policies to improved current policy
                     -> Experience Relay!
 
@@ -224,8 +224,8 @@
             . similar to SARSA but the 'target'/'new state estimation' is not based off the Q of the action, a_t+1, for s_t+1 given by current policy (does not follow the Generalized Policy Iteration algorithm/cycle)
                 -> estimation is based on the max possible Q for state s_t+1
                     . the estimation does not follow a policy -> off policy, and instead try to use the best possible action, a_t+1, for the estimation
-
-                . exploration policy, PI(s_t+1) = argmax Q(s_t+1, a) or random action
+                        exploration policy, PI(s_t+1) = argmax Q(s_t+1, a) or random action
+                
 
                 -> Target/Estimation = r_t+1, gamma * max_a Q(s_t+1, a)
 
