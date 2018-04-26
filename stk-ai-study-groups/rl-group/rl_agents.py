@@ -119,7 +119,7 @@ class SARSAControlAgent():
         if (exploration_function is not None):
             self.exploration_function = exploration_function
         else:
-            self.exploration_function = lambda : np.random.rand(1) < 0.1
+            self.exploration_function = lambda i : np.random.rand(1) < 0.1
 
         # Initialize Q and PI with random values
         self.q_matrix = np.zeros([self.action_space, self.state_space]) #np.random.random_sample([self.action_space, self.state_space])
@@ -159,8 +159,11 @@ class SARSAControlAgent():
         best_action = np.argmax(self.q_matrix[:, s])
         self.policy_matrix[s] = best_action
 
+    def get_latest_episode(self):
+        return self.last_episode
+
     def initialize_epoch(self):
-        pass
+        self.last_episode = []
 
     def execute_epoch(self, nof_steps, env, s0, render_function=None):
         # Get Hashed initial state
@@ -199,7 +202,10 @@ class SARSAControlAgent():
             self.update_policy(s0)
 
             s0 = s1
-            if done: break
+
+            if done: 
+                self.last_episode = [s0, a0, r]
+                break
 
 class QLearningAgent():
     # QLearning TD(0) control, based on https://mpatacchiola.github.io/blog/2017/01/29/dissecting-reinforcement-learning-3.html
@@ -216,7 +222,7 @@ class QLearningAgent():
         if (exploration_function is not None):
             self.exploration_function = exploration_function
         else:
-            self.exploration_function = lambda : np.random.rand(1) < 0.1
+            self.exploration_function = lambda i : np.random.rand(1) < 0.1
 
         self.exploratory_policy = exploratory_policy
 
@@ -250,8 +256,11 @@ class QLearningAgent():
         best_action = np.argmax(self.q_matrix[:, s])
         self.optimal_policy_matrix[s] = best_action
 
+    def get_latest_episode(self):
+        return self.last_episode
+
     def initialize_epoch(self):
-        pass
+        self.last_episode = []
 
     def execute_epoch(self, nof_steps, env, s0, render_function=None):
         # Get Hashed initial state
@@ -275,9 +284,11 @@ class QLearningAgent():
             self.update_optimal_policy(s0)
 
             s0 = s1
-            if done: break
+            
+            if done: 
+                self.last_episode = [s0, a0, r]
+                break
 
-    
 
 if __name__ == "__main__":
     #TODO

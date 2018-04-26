@@ -165,6 +165,44 @@ def sarsa_control_gridworld():
     print("Policy matrix after " + str(epoch+1) + " iterations:") 
     print_grid_world_policy(sarsa_agent.policy_matrix)
 
+def sarsa_control_frozenlake():
+    env = gym.make("FrozenLake-v0")
+    env.seed(0)
+
+    gamma = 0.99
+    alpha = 0.85
+    nof_epochs = 50000
+    nof_steps = 1000
+    print_step = 1000
+    exploration_function = lambda i : np.random.rand(1) < (1./((i/100) + 1))
+    sarsa_agent = rl_agents.SARSAControlAgent(observation_space=[env.action_space.n, env.observation_space.n], alpha=alpha, gamma=gamma, _lambda=0)#,\
+                                              #exploration_function=exploration_function)
+
+    r_all_epochs = 0
+
+    for epoch in range(nof_epochs):
+        #Reset the environment
+        s0 = env.reset()
+        sarsa_agent.initialize_epoch()
+
+        sarsa_agent.execute_epoch(nof_steps, env, s0, render_function=env.render if (epoch % print_step == 0) else None)
+        r_all_epochs += sarsa_agent.get_latest_episode()[2]
+
+        # Printing
+        if(epoch % print_step == 0):
+            print("")
+            print("Q matrix after " + str(epoch+1) + " iterations:") 
+            print(sarsa_agent.policy_matrix)
+            print("Policy matrix after " + str(epoch+1) + " iterations:") 
+            print_frozenlake_policy(sarsa_agent.policy_matrix)
+    
+    # Time to check the utility matrix obtained
+    print("Q " + str(nof_epochs) + " iterations:")
+    print(sarsa_agent.policy_matrix)
+    print("Policy matrix after " + str(epoch+1) + " iterations:") 
+    print_frozenlake_policy(sarsa_agent.policy_matrix)
+
+    print ("Score over time: " +  str(r_all_epochs/nof_epochs))
 
 def qlearning_gridworld():
     np.random.seed(1)
@@ -195,13 +233,13 @@ def qlearning_gridworld():
         if(epoch % print_step == 0):
             print("")
             print("Q matrix after " + str(epoch+1) + " iterations:") 
-            print(qlearn_agent.optimal_policy_matrix)
+            print(qlearn_agent.q_matrix)
             print("Policy matrix after " + str(epoch+1) + " iterations:") 
             print_grid_world_policy(qlearn_agent.optimal_policy_matrix)
     
     # Time to check the utility matrix obtained
     print("Q " + str(nof_epochs) + " iterations:")
-    print(qlearn_agent.optimal_policy_matrix)
+    print(qlearn_agent.q_matrix)
     print("Policy matrix after " + str(epoch+1) + " iterations:") 
     print_grid_world_policy(qlearn_agent.optimal_policy_matrix)
 
@@ -213,8 +251,10 @@ def main():
     #mc_control_frozenlake()
 
     #sarsa_control_gridworld()
-    
-    qlearning_gridworld()
+    sarsa_control_frozenlake()
+
+    #qlearning_gridworld()
+
 
 if __name__ == "__main__":
     main()
