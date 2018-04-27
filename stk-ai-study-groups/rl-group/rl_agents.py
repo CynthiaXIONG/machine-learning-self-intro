@@ -235,7 +235,10 @@ class QLearningAgent():
             action = np.random.randint(0, self.action_space)
         else:
             # Get from policy
-            action = self.exploratory_policy[s]
+            if (self.exploratory_policy is not None):
+                action = self.exploratory_policy[s]
+            else:
+                action = self.optimal_policy_matrix[s]
         return action
 
     def _get_q_prediction_error(self, q_matrix, s0, a0, r, s1, gamma):

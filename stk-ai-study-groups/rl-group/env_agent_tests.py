@@ -243,6 +243,91 @@ def qlearning_gridworld():
     print("Policy matrix after " + str(epoch+1) + " iterations:") 
     print_grid_world_policy(qlearn_agent.optimal_policy_matrix)
 
+def qlearning_frozenlake():
+    env = gym.make("FrozenLake-v0")
+    env.seed(0)
+
+    gamma = 0.999
+    alpha = 0.001
+    nof_epochs = 50000
+    nof_steps = 1000
+    print_step = 100
+    exploration_function = lambda i : np.random.rand(1) < (1./((i/100) + 1))
+
+    exploratory_policy_matrix = None#np.array([1,0,1,0, 
+                                          #1,0,1,0, 
+                                          #2,2,1,0, 
+                                          #0,2,2,0])
+    
+    qlearn_agent = rl_agents.QLearningAgent(observation_space=[env.action_space.n, env.observation_space.n], alpha=alpha, gamma=gamma, \
+                                            exploratory_policy=exploratory_policy_matrix,\
+                                            exploration_function=exploration_function)
+
+    r_all_epochs = 0
+
+    for epoch in range(nof_epochs):
+        #Reset the environment
+        s0 = env.reset()
+        qlearn_agent.initialize_epoch()
+
+        qlearn_agent.execute_epoch(nof_steps, env, s0)#, render_function=env.render if (epoch % print_step == 0) else None)
+        r_all_epochs += qlearn_agent.get_latest_episode()[2]
+
+        # Printing
+        if(epoch % print_step == 0):
+            print("")
+            #print("Q matrix after " + str(epoch+1) + " iterations:") 
+            #print(qlearn_agent.q_matrix)
+            print("Policy matrix after " + str(epoch+1) + " iterations:") 
+            print_frozenlake_policy(qlearn_agent.optimal_policy_matrix)
+    
+    # Time to check the utility matrix obtained
+    print("Q " + str(nof_epochs) + " iterations:")
+    print(qlearn_agent.q_matrix)
+    print("Policy matrix after " + str(epoch+1) + " iterations:") 
+    print_frozenlake_policy(qlearn_agent.optimal_policy_matrix)
+
+    print ("Score over time: " +  str(r_all_epochs/nof_epochs))
+
+def blog_q_learning():
+    env = gym.make("FrozenLake-v0")
+    env.seed(0)
+
+    #Initialize table with all zeros
+    Q = np.zeros([env.observation_space.n,env.action_space.n])
+    # Set learning parameters
+    lr = .8
+    y = .95
+    num_episodes = 2000
+    #create lists to contain total rewards and steps per episode
+    #jList = []
+    rList = []
+    for i in range(num_episodes):
+        #Reset environment and get first new observation
+        s = env.reset()
+        rAll = 0
+        d = False
+        j = 0
+        #The Q-Table learning algorithm
+        while j < 99:
+            j+=1
+            #Choose an action by greedily (with noise) picking from Q table
+            a = np.argmax(Q[s,:] + np.random.randn(1,env.action_space.n)*(1./(i+1)))
+            #Get new state and reward from environment
+            s1,r,d,_ = env.step(a)
+            #Update Q-Table with new knowledge
+            Q[s,a] = Q[s,a] + lr*(r + y*np.max(Q[s1,:]) - Q[s,a])
+            rAll += r
+            s = s1
+            if d == True:
+                break
+        #jList.append(j)
+        rList.append(rAll)
+
+    print("Score over time: " +  str(sum(rList)/num_episodes))
+    print("Final Q-Table Values")
+    print(Q)
+
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))  # Change dir to this script location
     os.system('') #enable ansi colors
@@ -251,9 +336,11 @@ def main():
     #mc_control_frozenlake()
 
     #sarsa_control_gridworld()
-    sarsa_control_frozenlake()
+    #sarsa_control_frozenlake()
 
     #qlearning_gridworld()
+    #qlearning_frozenlake()
+    #blog_q_learning()
 
 
 if __name__ == "__main__":
