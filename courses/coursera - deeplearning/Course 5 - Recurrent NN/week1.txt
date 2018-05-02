@@ -40,7 +40,7 @@
                 y^<1> = g(Wya*a<1> + by)  <- usual g(z), sigmoid (if 01), softmax (if many classes)
 
                 a<t> = g(Waa*a<t-1> + Wax*x<t> + ba)   | y^<t> = g(Wya*a<t> + by)
-                a<t> = g(Wa * [a<t-1>, x<t>] + ba)     <- Wa = [Waa, Wax]  (stack both matrices horizontaly)    :   [a<t-1>, x<t>] (stacked vertically   ->>> matmul of those will be the same result the Eq above, but simplifies notation as we only have 1 parameter matrix Wa)
+                a<t> = g(Wa * [a<t-1>, x<t>] + ba)     <- Wa = [Waa, Wax]  (stack both matrices horizontaly)    :   [a<t-1>, x<t>] (stacked vertically   ->>> matmul of those will be the same result the Eq above, but simplifies notation as we only have 1 parameter matrix: Wa)
 
             - RNN Back Prop -
                 . element wise Loss function (logistic regression loss -> cross-entropy loss)
@@ -72,6 +72,139 @@
                     . output of previous element is the input of the next element (after the initial element ofc)
 
                 
+    -- Language Model --
+        . given any sentence, gives probability of sentence being the next processed sentence - P(sentence) = P(y<1>, y<2>, ..., y<Ty>)
+        . traning set: Large corpus of Text!!
+            . Corpus -> large set/body
+        
+        . Tokenize:
+            . forme a vocabulary, where the words are mapped to an index
+            . also map the <EOS> (end of sentence) token -> usuful in some cases
+            . the vocabulary has the most common words...not every single word!!
+                -> use <UNK> token for words not in the vocabulary
+            
+        - RNN Model Tranning-
+            -> Sequence Model: Models the change of any particular sequence of words
+            -> each step of the RNN tries to predict the next word, given the precceding words
+            0. x<1> = 0, a<0> = 0
+            i. first element, y^<1> is the probability of a single word (the first word), softmax, P(cat)
+            ii. y^<2> is the probability of the second word, given the first word, P(is|cat)
+            
+            -> Cost Function:
+                L(y^<t>, y<t>)<t> = -sum_i(yi<t> * log y^i<t>)  (softmax loss)
+                L = sum_t(L(y^<t>, y<t>)<t>)
+            
+            - Sampling Sequences -
+                . After traning, we can sample a sequence from the trained RNN
+                0. x<1> = 0, a<0> = 0
+                i. from the first element softmax output probability (y^<1>), sample by that distribution
+                    -> np.random.choice
+                ii. go on to the second timestep, and use the sampled output y1 obtained in the first step, and do the same distribution sampling on this output
+                iii. keep sampling untill you reach the <EOS> token (or have some other rule, like length based)
+                
+            Note: Character level models have much less vocabulary (just the chars) but requires way more elements in the RNN.
+                This is more computationally expensive
+                It also makes it harder to find relations between the begninning and the end of a setence (long term dependencies, like plural).
+                -> Word level models give better results!!
+        
+     -- Vanishing Gradients Problem --
+        . problem of tranning very deep NNs.
+            . gradient has hard time propagating back to affect the earlier layers (gradient gets smaller and smaller)
+                -> traines very slowlly..
+        . inputs (words) have hard time influencing other inputs that are far from its place in the RNN chain (hard for the error to backpropate to early elements of the RNN)
+            e.g: "The cat, which already ate ........(many many word), WAS full"  -> the model needs to remember that 'cat' is singular to choose WAS instead of WERE at the end of this sentence
+        
+        -> Exploding Gradients:
+            Also occurs in deep NN.
+            Easier to solve for RNN -> to Gradient Clipping (rescale/clip the max of gradients if too large)
+                ease to notice when you start getting NaNs for the weights/activation values
+        
+        -> Solutions to Vanishing Grads:
+
+            - Gated Recurrent Unit (GRU) -
+                . very effective to allow RNN to capture very long dependencies in the sequence
+
+                . GRU Unit:
+                    . c = memory cell
+                        c<t>  -> outputs a<t>  (a<t> = c<y>)
+
+                    . c~<t> = tanh(Wc[c<t-1>, x<t>] + b_c)  -> c~ is a candidate to replace/improve c
+                    . gamma_u = [0-1] = sigmoid(Wu[c<t-1>, x<t>] + b_u)  -> update Gate, which because it uses the sigmoid function, is almost always either 0 or 1
+                        . This 'Update Gate' decides if c~ should replace calc
+                        . e.g: c<t> could be is the word is plural or singular (c<t> = 1 for singular)
+
+                    -> c<t> = gamma_u * c~<t> + (1 - gamma_u) * c<t-1>  (Update function, * is an element wise mult)
+                        . Because gamma_u can easily be very close to 0, it makes c<t> = c<t-1> (preserving its value, like a memory!, and helping to reduce the vaninshing grad problem)
+
+
+                    This was a simplified method...the full GRU uses an additional matrix, gamma_r
+                        . gamma_r is the "weight/importance" of c<t-1> in the calculation of c<t>
+                             c~<t> = tanh(Wc[gamma_r * c<t-1>, x<t>] + b_c)
+                             gamma_r = sigmoid(Wr[c<t-1>, x<t>] + b_r)
+
+            - Long Short Term Memory (LSTM) -
+                . even more powerfull than GRU, but more complex (harder to build deeper NN)
+                . for GRU, a<t> = c<t>
+
+                -> In LSTM: 
+                    c~<t> = tanh(Wc[a<t-1>, x<t>] + b_c)
+                    gamma_u = sigmoid(Wu[a<t-1>, x<t>] + b_u) -> remember Gate
+                    gamma_f = sigmoid(Wf[a<t-1>, x<t>] + b_f) -> forget Gate (uses two seperate gates for the update of 'c' -> gives option of keeping the last value c<t-1> and still add the information of the new c~<t>)
+                    gamma_o = sigmoid(Wo[a<t-1>, x<t>] + b_o) -> output Gate
+
+                    c<t> = gamma_u * c~<t> + gamma_f * c<t-1>
+                    a<t> = gamma_o * tanh(c<t>)
+
+    
+    -- Bidirectional RNN - BRNN --
+        . getting information from the future
+            -> allows for a particular element of the sequence to take the information from earlier and later elements
+            . eg: Teddy Roosevel was a great President  -> you need the next words to know if Teddy is a teddy bear or a name of a person
+
+        a-><t> -> forward recurrent component (same as RNN)
+        a<-<t> -> backward recurrent component  (the forward prop goes in the opposite direction, from the end to the start)
+
+        y^<t> is a function of a-><t> and  a<-<t> 
+        y^<t> = g(Wy[a-><t>, a<-<t>] + b_y)      , gets both information from the past, a-><t> as from the future, a<-<t>
+
+        . The blocks in the RNN can be the standard RNN, GRU or LSTM
+        . disdvantage:
+            . it is required the full sequence before it can start making predicitions.
+                e.g: problematic in real time translation as it needs the person to stop talking before it can process/translate
+
+    
+    -- Deep RNNs --
+        . nice for complex problems/Sequences\
+        . stack RNNs together, vertically, where the inner layers have as input the ouput of the previous layers
+
+        a[n]<t> -> activation of the layer 'n', of the element 't'
+        a[2]<3> = g(Wa[2][a[2]<2>, a[1}<3>] + b_a[2])
+
+        . having 3 layers is already alot (VERY VERY COMPUTATIONAL EXPENSIVE)
+
+        Note: you can also stack just plain DNN on top of the output of the layers, not connected horizontaly (the RNN element connection just exists on the initial layers)
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+        
+
+
+        
+
+        
 
 
 
