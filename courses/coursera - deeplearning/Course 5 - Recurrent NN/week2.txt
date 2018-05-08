@@ -1,0 +1,117 @@
+--- Word Embeddings ---
+    . very powerful NLP technic, very useful when there isnt avialabel a large traning set (ability to generealize from similar words)
+    -> method for Word Representation
+        . allows algorithms to understand more about words?
+        . similar to the image recognition encoding vectors (course 4)!!
+
+    -- Word Representation --
+        . week1 we were representing words in a vocabulary, with one-hot vector representations
+            . there is no relationship between words
+            . cant generalize between words that have some kind of relationship
+
+        -> Featurized representation of a word
+            . e.g: gender, royal, is_food, cost, size, color, is_alive, is_noun, etc...
+            . enable ability to generalize and to create and group words by concepts
+        
+        -> Train a model to Learn these features as parameters!
+            i. usually from huge amounts of text corpus -> learns the words Embeddings
+                . or download pre-traned Embeddings online
+            ii. use transfer learning and apply these words Embeddings to another application where the data set is small
+            iii. optional: continue to finetune the word Embeddings with the new data!
+
+        - Properties of Word Embeddings -
+            . good to figure out analogies (man -> women as king->?????)   other eg:(Paris:France as London:England, Big:Bigger as Tall:Taller, Yen:Japan as Ruble:Russia)
+                . delta e_man (embedding of 'man') and e_woman is a vector embedding of that is the relationship between the two. Adding this delta to e_king you get approx e_queen
+        
+                -> algorithm:
+                    e_man - e_woman =~ (approx) e_king - e_?
+                        e_w (w=)?, argmax_w Similarity_function(e_w, e_king-e_man+e_woman)
+                        to find the word that maximises the similarity it should find/pick up the word queen
+        
+                    . Cosine Similarity:
+                        sim(u, v) = u' * v / (||u||^2 * ||v||^2)
+
+                        . Equillidian distance is also okay, but cosine similarity works better
+
+        - Embedding Matrix -
+            . result of learning word Embeddings
+            . E -> embedding Matrix
+                . number_features x vocab_size
+            . E * O_i = e_i (embbiding vector for word 'i')   O_i is the one-hot vector for word 'i'
+                -> in practice, not effecient to implement this way....just use a matrix lookup technic instead
+            
+    -- Learning Word Embeddings --
+        - Using a Neural Language Model -
+            . paper: Bengio, 2003, A neural probabilistic language model
+            . use a window to predic of precceding words to predict the next word in a text (like 4 last words -> context), feed the e_is of these words and use a fullyconnected (stacking the e_is) layer where these are feed and a softmax to predic the word (and train this way the E matrix by back prop)
+            . use the same E for all words
+            -> This will learn pretty decent the words embbeddings
+                . one of the early algorithms (2003), but quite effective
+
+            . Note: the "context" usually is some words before but also some words after! (but is a more complex context)
+                    . something that also works well is to select one "nearby" word -> much simpler and also works very well
+  
+        - Word2Vec -
+            . simpler and more effecient than building a language model and using complex contexts - 2013
+
+            -> Skip-grams Algorithm:
+                . paper: Mikolov, 2013, Efficient estiamtion of word representation in a vector space
+                . create context-target pairs
+                    . pick context words and pick at a random nearby position (e.g:+/- 10 positions) the target word to form a new pair
+
+                i. Use O_c (one-hot of context), get e_c = E * O_c -> pass to softmax = y_pred
+                ii. this y_pred is the P(t|c) (prob of target 't' given context, 'c')  -> given a context word, it tries to predict what word comes a little bit before or after the context word
+                    -> results in quite nice word embbeddings
+                        . But has the softmax needs to do a sum of all the words in the vocabulary (because that is the number of categories) -> Very Computational Expensive
+                            . One solution is to use a:
+                                Hierarchical softmax -> treebased softmax, where the computational complexity is Log(O) instead of O
+
+            -> Note: How to choose/sample the context word?
+                . because some words like prepositions (the, of, a, etc) are very common, you dont want to sample at a uniformly distributed chance. Instead use some heuristics to have a more "balanced" vocabulary of sampled words with less common words
+
+            
+        - Negative Sampling -
+            . paper: Mikolov, 2013, Distributed representation of words and phrases and their compositionality
+            . solves the issue of the high computational cost when calculating the softmax as it needs to sum all the items in the vocabulary
+                -> uses a more effecient algorithm
+
+            . use supervised learning (labeled data)
+                -> goal is to distinguish and predict target words that are likely to appear near a certain context word
+                    i. pick a context and target pair that is nearby (like orange - juice, where they probably have some kind of relationship), and assign the label to 1
+                    ii. pick random 'k' words from the vocabulary to be the other targets and form more pairs that the label will be 0 (even if have a relationship)
+                        . chose small k for larget data-sets (2-5) and big k for smaller data sets (5-20)
+                        . these 'negative' pairs are what gives the name to the algorithm -> 'Negative Sampling'
+                    
+                -> binary logistic regression problem, P(y=1 | c, t)  = sigmoid (theta_t * e_c)
+
+                -> instead of having a giant softmax for all the possible categories/words in the vocabulary (very expensive), have instead the same number (vocab size) but instead of binary classification problems (much cheaper) and just train 'k+1' elements every iteration rather than updating them all in the giant softmax
+
+            - How to sample the targets that generate the 'k' negative samples -
+                . sample the words based on the frequency of them apperaring in a text corpus, -> gave good emperical result according to the original paper 
+
+        - GloVe word vectors -
+            . not used as much as the Word2Vec or the skip_grams models, but simpler!
+            . paper: Pennington, 2014, GloVe: Global vectors for word representation 
+
+            i. for your traning set, get these input:
+                Xij = #times i appers in context of j    i -> target, and j->context
+            ii. minimize the differnce between word i and j (how related they are)
+                minimize sum_i_voc(sum_j_voc(f(Xij) * (tetha_i * e_j + b_i + b_j' - log Xij)^2 
+                    f(Xij) is a "weighting term" that if Xij = 0, then f(Xij) is 0 and we dont have to compute the log(0) (error)
+                        -> also can smooth the values of very common words (that will have Xij very height, so they don't have a very high importance) and also give more importance to very rare words
+
+            Note: tetha_i and e_j are symmetrical
+                e_w (final) = (e_w + theta_w) / 2  <- because they are symmetrical, the final embbiding for a word can be given by the average of these matrixes!
+        
+
+    --- Applications for Word Embeddings ---
+
+        -- Sentiment Classification --
+
+
+                    
+
+
+            
+
+    

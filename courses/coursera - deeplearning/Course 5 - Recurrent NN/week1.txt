@@ -150,7 +150,7 @@
                     c~<t> = tanh(Wc[a<t-1>, x<t>] + b_c)
                     gamma_u = sigmoid(Wu[a<t-1>, x<t>] + b_u) -> remember Gate
                     gamma_f = sigmoid(Wf[a<t-1>, x<t>] + b_f) -> forget Gate (uses two seperate gates for the update of 'c' -> gives option of keeping the last value c<t-1> and still add the information of the new c~<t>)
-                    gamma_o = sigmoid(Wo[a<t-1>, x<t>] + b_o) -> output Gate
+                    gamma_o = sigmoid(Wo[a<t-1>, x<t>] + b_o) -> output Gate, to decide which outputs we will use
 
                     c<t> = gamma_u * c~<t> + gamma_f * c<t-1>
                     a<t> = gamma_o * tanh(c<t>)
