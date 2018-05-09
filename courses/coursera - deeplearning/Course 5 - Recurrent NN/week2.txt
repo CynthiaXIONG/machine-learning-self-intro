@@ -107,6 +107,52 @@
     --- Applications for Word Embeddings ---
 
         -- Sentiment Classification --
+            . classify if subject "likes" or "dislikes" what is talking about 
+                . predict start rating based on text review
+
+            -> challanges: usually there avaialble data set is small (10.000 - 100.000 words)
+                . word embbeddings helps to overcome this problem
+
+            - Models -
+            -1
+                i. from the input words, get the embeddings (e = o * E)
+                ii. sum or avg the embbidings of all the words in the review and get a single 'e' values
+                iii. pass through a softmax layer that classifies into 1-5 starts
+
+                . this model will average/sum the 'meaning' of all the words
+                    . will work 'okay'...not good for negative statements/word order
+                        e.g: lacking good taste and good service
+
+            -2
+                . Use a RNN (many-to-one) instead of just avg/summing the embbeddings, and inputs are the embbeddings vectors
+                    -> solves the issue of word order and sentence structure!
+
+
+    --  Debiasing Word Embeddings --
+        . diminishing the 'bias' in the word embeddings (gender, ethnicity, social status, income, stereotype bias), pickued up from the texts used to train these models
+            . eg: Man:Computer_Programmer as Woman:Homemaker ??? NOT nice
+
+        -> Pretty big problam as ML is used more and more in our society (loands, criminal justice, job applications)
+
+                                        
+        i. Identify bias direction
+            . for example gender bias
+                . average some examples like: e_he - e_she, e_male - e_female, ...
+                     = delta_e_male__to_female  (this could be achieved by using PCA, to get this linear direction)
+
+        ii. Neutralize:
+            . for every word that is not definitional (like doctor-nurse vs father-mother which is definitional)
+                . project to get rid of the bias (like in a PCA...just project to that line, eliminating the 'bias' in that axis/dimensions)
+
+        iii. Equialize pairs
+            move the biased second element pairs, that are gender specific ( like boy/girl, he/she, man/woman, etc..) so that they are now at the same 'distance' to the neutralized words (doctor, nurse, etc)
+                -> 
+
+        Note: you can use a binary classifier to tell you which words are gender specific or not (and if not, then they should be neutralized)
+
+
+
+
 
 
                     
