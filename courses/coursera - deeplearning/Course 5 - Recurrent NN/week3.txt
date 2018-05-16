@@ -1,0 +1,30 @@
+--- Sequence to Sequence Models ---
+    .eg: machine translation, 
+
+    -- Basic Models --
+        
+        - Encoder-Decoder Model -
+            . use an RNN to create a "encoded" vector from an input, and use a RNN to decode it 
+                -> encode setence in french and decode to english
+                -> image captioning, encode image (using a CNN, like AlexNet to encode the image in a feature vector) and decode to the caption
+
+            . decode takes as input initially the encoded vector (for a0) and then the previous y^
+        
+     -- Picking the most Likely Sentence --
+        . instead if picking a random output like done previously for text generation
+
+            -> Language model: modeling the probabilities of the every next possible word (depending on the previous ones), and sample at random from the distribution
+
+            -> Machine Translation: estimate the probability of the output sentence conditioned by an input sentence, and sample the most probable (the best one, the max, deterministic behaviour)
+
+                -> To find the max, dont use Greedy Search
+                    . will be stuck in local minima, because it will the best first word and so one....dont explore all the space
+
+                ->> Use BEAM Search
+
+        - Beam Search -
+            . broad algorithm to find the output that maximizes the probability
+            . approximate search algorithm (search space is too big for a brute force search)
+
+            
+

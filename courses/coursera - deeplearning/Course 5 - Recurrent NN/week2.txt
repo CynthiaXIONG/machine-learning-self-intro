@@ -129,7 +129,7 @@
 
 
     --  Debiasing Word Embeddings --
-        . diminishing the 'bias' in the word embeddings (gender, ethnicity, social status, income, stereotype bias), pickued up from the texts used to train these models
+        . diminishing the 'bias' in the word embeddings (gender, ethnicity, social status, income, stereotype bias), picked up from the texts used to train these models
             . eg: Man:Computer_Programmer as Woman:Homemaker ??? NOT nice
 
         -> Pretty big problam as ML is used more and more in our society (loands, criminal justice, job applications)
