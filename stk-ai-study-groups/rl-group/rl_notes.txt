@@ -247,6 +247,8 @@
     
     Conclusion: TD methods converge faster than MC methods!
         
+--- Actor-Critic ---
+    . critic
 
 
 

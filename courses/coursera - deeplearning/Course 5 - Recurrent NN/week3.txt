@@ -26,5 +26,55 @@
             . broad algorithm to find the output that maximizes the probability
             . approximate search algorithm (search space is too big for a brute force search)
 
+    -- Attention Model --
+        . paper: Bahdanay 2014, Neural machine translation by jointly learning to align and translate
+        . for long sequences, it is easier to divide the subsequence into shorter ones
+            -> for machine translation, Bleu score drops as sentence length increases...but this is solved by dividing into shorter ones
+
+        -> Use 'Attention Weights' to determine which elements of the input sequence should be taken into consideration for a certain output element
+            . these weights, alpha<i, t> depende on the a<t> of the input element t and the state of the previous output element s<i-1>
+                -> alpha: amount of 'attention' y<t> should pay to a<i>
+
+        input of the output elements - c 'contact'
+            contact<i> = sum_t(alpha<i, t>*a<t>)
+
+            a<t, t'> = exp(e<t, t') / sum_T(exp(e<t, t'>))   <- a softmax for the elements e<t, t'>  
+                e<t, t'> -> use small NN to compute it, to learn this function mapping:
+                    input layer: s<t-1> + a<t'>  (we know it depends on these inputs)
+                    FC layer
+                    output: e<t, t'> (trust that the NN will find the F(s<t-1>, a<t'>))
+
+        Note: algorithm has quadratic cost, Tx * Ty  -> quite expensive
+
+        . this ideia can also be applied to image_caption: just pay attention to certain parts of the picture at a time
+
+        . visualizing the 'alphas', attentions, could give nice intuition to what the output sequence is paying attention from the input sequence
+
+
+    -- Speech Recognition --
+        . problem: given auto clip x, find text transcript y
+        . preproccess of the audio clip: applying preprocess methods like frequency/amplitude plotting is a common first step
+
+        -> Use the 'Attention Model'
+            . use CTC cost: Connectionist Temporal Classification
+                input has very high frequency..output has repeated characters (so it outputs at the same frequence):
+                    eg: the quick -> ttt_h_eee___s___qqq...
+                    -> collpase repeated characters not seperated by '_' (blank)  -> convert the repeated to the text characters
+
+        - Trigger Word Detection -
+            . keyword detection....much easier to do (less traning data required) than proper speech Recognition
+            . just training on normal speech with many words and just one trigger word will produce a very imbalaced traning set (many many negatives)
+                -> hack solution:  on a sequence, when the trigger word is inputed as an element, have some of the procedding elements also be labbeled as positive
+                    hey->0, ale->1, xa->1, ple->1, ase->1, tell->0, .....
+
+                
+
+
+
+
+        
+
+
+
             
 
