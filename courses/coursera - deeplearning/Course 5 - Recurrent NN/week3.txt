@@ -22,9 +22,80 @@
 
                 ->> Use BEAM Search
 
-        - Beam Search -
+        
+        -- Beam Search --
             . broad algorithm to find the output that maximizes the probability
             . approximate search algorithm (search space is too big for a brute force search)
+
+            i. Try to pick the first element
+                . P(y<1>|x), for the input sequence X, get the probability of the fisrt element y^ (from the softmax output of all the options)
+                    . greedy search would only pick the highest prob
+                    . beam search: will select multiple best contenders (number defined by B -> beam width)
+                        -> B = 1, is equal to greedy search
+
+            ii. for each previous word from the prev beam search step, select the next most probable 'B' words
+                P(y<1>,y<2>|x) = p(y<1>|x) * p(y<2>|x,y<1>) -> the probability of pair of the first and second word (which is equal to the prod of the two seperate conditional probabilities)
+
+            iii. repeat ii. for the next words, going in a breath first manner
+
+            iv. pick the 3 more probable sub-sequences out of these previous evaluations and repeat (only with 3 options)
+
+            -> Number of combinations evaluated = vocab_size * beam_width
+
+            v. when you reach a sequence end condition (<EOS>), store this sequence
+            
+            vi. when all the final sequences have been evaluated and stored, choose the one with the highest probability!!
+
+            - Tricks and Tips -
+                -> Length Normalization:
+                    . the probabilities for the subsequences as they are calculated as products of conditional probabilities (small fraction number) can result in a very very small number
+                        -> Numerical Underflow: too small for the float representation to represent with good accuracy
+
+                        solution: instead of using a product (PI), use a sum of the logs of the conditional probabilities!
+                            -> results in  a more numerical stable algorithm, with less rounding errors
+
+                    -> Length problem
+                    . Because the result of a probability of a sequence made by multiple conditional probs (which are small numbers)
+                        -> Model will prefer smaller sequences as the probability will be less reduced by further elements (penalty of big sequences)
+
+                        -> normalize the result by the length of the sequence
+
+                            1/T_y^alpha * prob
+                                . alpha is tipically 0.7 (if = 0, no normlization and alpha = 1, fully normlaized)  <- heuristic
+
+                -> Which B to choose?
+                    . larger B is better (wider search, better result) but increases computional cost (bad performance and memory use)
+                    . typical for production system: B = 10
+                    . research/benchmark: B = 100-1000
+
+
+            -- Error Analysis on Beam Seach --        
+                . beam search, because is not a exact seach but instead an approxiamte search (does not search all possibilities) can be very prone to miss the best/optimal solution
+                    -> when to know if the model bad accuracy is caused by the RNN model or by the beam search not being wide enough?
+
+                RNN computes P(y|x), 
+                    compare: P(y*|x) > or < P(y^|x)   (y* = real value, y^ = pred value)
+
+                        if P(y*|x) is bigger: Beam search is failling to find the best/max fix
+
+                        if P(y^|x) is bigger: RNN is at fault, bc the truth is that y* is better than y^ but the RNN predicted the opposite
+
+                        note: if using lenght-normalization, compare the optimization object value instead
+
+                
+        --- Bleu Score ---
+            . How to evaluate a machine translation, where there can be mutliple correct translations?
+
+            -> Bleu Score: as long as the machine translation is close to any of the human translations, then it gets a high Score
+                -> BLEU: bilingual evaluation understudy
+
+            Precision method: count if the word appear in both the references and the machine translation output (but clip the count to the max number of times it shows in any the references)
+
+                -> Use single words, but also bigrams (2 word sequence) and even bigger sequences
+
+            -> This Score is great because it results in just a single real number evaluation metric!
+                -> good for any sequence-to-sequence where the output is a sentence (image captioning) that has mutiple/subjective correct labels
+                     
 
     -- Attention Model --
         . paper: Bahdanay 2014, Neural machine translation by jointly learning to align and translate
@@ -67,12 +138,23 @@
                 -> hack solution:  on a sequence, when the trigger word is inputed as an element, have some of the procedding elements also be labbeled as positive
                     hey->0, ale->1, xa->1, ple->1, ase->1, tell->0, .....
 
-                
+
+                        
 
 
 
 
+
+
+
+
+
+<<<<<<< HEAD
         
+=======
+                    
+                     
+>>>>>>> 911cd73c6729bcbcb19e5acb7af9f26a958b1688
 
 
 
