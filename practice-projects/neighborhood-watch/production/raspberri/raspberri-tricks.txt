@@ -1,0 +1,81 @@
+----RPI---
+    pi3:
+        user:pi
+        pass:3
+        ip:192.168.0.19
+
+    connect with fullscreen
+    rdesktop -g 100% 192.168.0.19
+
+    how to connect to existing session (not sure this works:
+    https://askubuntu.com/questions/133343/how-do-i-set-up-xrdp-session-that-reuses-an-existing-session
+    (change .ini port=ask5910 and use -1 for the first time and then the default 5910)
+
+
+    https://olcko.gitbooks.io/staking-stratis-on-a-raspberry-pi/content/compile-stratis-qt.html
+    https://www.element14.com/community/docs/DOC-78170/l/connecting-to-a-remote-desktop-on-the-raspberry-pi
+
+    #check ips
+        login to router: 192.168.0.1, user:admin, pass:password
+
+
+---Camera---
+    see camera_test.py
+
+---Share Folder---
+    .using samba on pi
+    https://askubuntu.com/questions/777717/how-to-share-a-folder-on-ubuntu-to-raspberry-pi-3-over-local-wifi-network
+    https://garywoodfine.com/shared-folder-raspberry-pi-windows-8/
+
+    i) install samba on pi
+        apt-get install samba samba-common-bin
+
+    ii) Set a password for your user in Samba (tip, use the same as the linux user: pi (pass:3))
+        sudo smbpasswd -a <user_name>
+
+    iii) Create a directory to be shared
+        mkdir /home/<user_name>/<folder_name>
+
+    iv) Edit the samba config file
+        iv.a) first make a backup:
+        sudo cp /etc/samba/smb.conf ~
+
+        iv.b) add the new shared folder config
+        sudo nano /etc/samba/smb.conf
+
+        Once "smb.conf" has loaded, 
+
+            We need to enable WINS support, so  Change
+                wins support = no
+
+            To enhance the network performance, set TCP_NODELAY
+                uncomment: socket options = TCP_NODELAY
+
+            add this to the very end of the file:
+
+                [<folder_name>]
+                path = /home/<user_name>/<folder_name>
+                browsable = yes
+                valid users = <user_name>
+                read only = no
+
+    v) restart samba
+        sudo service smbd restart
+
+    vi) run test to check if conf is in good format
+        testparm
+
+     -- To access it --
+        To access your network share
+            sudo apt-get install smbclient
+            # List all shares:
+            smbclient -L //<HOST_IP_OR_NAME>/<folder_name> -U <user>
+            # connect:
+            smbclient //<HOST_IP_OR_NAME>/<folder_name> -U <user>
+
+        To access your network share use your username () and password through the path "smb:////" (Linux users) or "\\\" (Windows users). Note that "" value is passed in "[]", in other words, the share name you entered in "/etc/samba/smb.conf".
+
+            Note: The default user group of samba is "WORKGROUP".
+
+        - OR -
+            Within Windows Explorer try \\YourHostName\YourShareName, or from the Linux file manager try smb://YourHostName/YourShareName.

@@ -4,7 +4,7 @@
      -> Early layers detect simple features
      -> Consequent layers detect more complext features based on the composition of the previously detected simpler features
      e.g: image recgn: initially edges -> parts of the face (eye, mouth) -> faces
-        speech recogn: low level audio -> phonames -> words -> setences
+        speech recogn: low level audio -> phonames -> words -> sentences
 
     . The deeper the layer, the more complext the detected feature can become
 

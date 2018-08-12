@@ -270,7 +270,7 @@ def qlearning_frozenlake():
         s0 = env.reset()
         qlearn_agent.initialize_epoch()
 
-        qlearn_agent.execute_epoch(nof_steps, env, s0)#, render_function=env.render if (epoch % print_step == 0) else None)
+        qlearn_agent.execute_epoch(nof_steps, env, s0, render_function=env.render if (epoch % print_step == 0) else None)
         r_all_epochs += qlearn_agent.get_latest_episode()[2]
 
         # Printing
@@ -339,7 +339,7 @@ def main():
     #sarsa_control_frozenlake()
 
     #qlearning_gridworld()
-    #qlearning_frozenlake()
+    qlearning_frozenlake()
     #blog_q_learning()
 
 
