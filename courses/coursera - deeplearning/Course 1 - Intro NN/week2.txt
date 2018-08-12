@@ -42,7 +42,7 @@
 
         ->goal: find 'w' and 'b' that minimizes J(w,b)
             . Initialize w and b (to zero for example)
-            . Iteration: Calculate the derivative, and take a "stop" in that diraction
+            . Iteration: Calculate the derivative, and take a "step" in that diraction
                
                 w = w - α * (d(J(w, b))/d(w))
                 b = b - α * (d(J(w, b))/d(b))

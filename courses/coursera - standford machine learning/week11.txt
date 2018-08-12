@@ -62,7 +62,7 @@
         - Ceiling Analysis -
             . Estimating the error of each component of the Pipeline
                 . Have a single real value (some metric like Accuracy) for the performance of the whole model
-                i. For each component, starting from the first component of the background replace its output (what it identifies for example) with manual labeled correctly data and then test the same performance of the whole model  (simulatting a particular component working with perfect accuracy, "ceilling" the perfomance of the component)
+                i. For each component, starting from the first component of the pipeline replace its output (what it identifies for example) with manual labeled correctly data and then test the same performance of the whole model  (simulatting a particular component working with perfect accuracy, "ceilling" the perfomance of the component)
                     -> The improvement on the overall performance metric tells you how much can be improved on that particular component (if increases from 80%-90%, improving these component can yeld a 10% overall improvement)
                 ii. Continue and do the same on the second component of the Pipeline (keeping the perfect values of the first component, so we only assess the performance of the second component assuming that there is not error on its input (computed by the first component))
                 iii. And so on.... when all components are replaced with manual output, the overall metric should be perfect (100% accuracy)
