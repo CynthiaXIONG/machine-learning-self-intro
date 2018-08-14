@@ -79,3 +79,207 @@
 
         - OR -
             Within Windows Explorer try \\YourHostName\YourShareName, or from the Linux file manager try smb://YourHostName/YourShareName.
+
+
+--- Setup VPN (to enable remote desktop from work into my PCs) ---
+    https://www.pcmech.com/article/raspberry-pi-vpn-access-network/
+
+
+    -- Setup Server on Pi --
+    i) Install openvpn
+        sudo apt install openvpn easy-rsa
+
+    ii) Create Certificates
+        a) create dir for Certificates
+            $ sudo make-cadir /etc/openvpn/certs
+            $ sudo su    -> enter super mode otherwise permission denined
+            $ cd /etc/openvpn/certs
+
+        b) link openssl config
+            $ ls | grep -i openssl    -> search for openssl files
+            $ sudo ln -s openssl-1.0.0.cnf openssl.cnf
+
+        c) Open a file called “vars.” Find the KEY_SIZE variable first. It’s set to 2048 by default. Change it to 4096.
+            $ nano vars
+
+            export KEY_SIZE=4096
+
+            ->It helps if this info is accurate, but anything that you can remember is fine.
+
+            export KEY_COUNTRY="SE"
+            export KEY_PROVINCE="STHLM"
+            export KEY_CITY="Stockholm"
+            export KEY_ORG="diogovasconcelos"
+            export KEY_EMAIL="diogo.am.vasconcelos@gmail.com"
+            export KEY_OU="diogovasconcelos"
+            export KEY_NAME="HomeVPN"
+
+            ->save and exit
+
+        d) The Easy-RSA package that you installed before contains a lot of scripts that help to set up everything that you need. You just need to run them. Start by adding the “vars” file as a source. That’ll load all of the variables that you just set.
+
+            $ source ./vars
+
+            Next, clean up the keys. You don’t have any, so don’t worry about the message telling you that your keys will be deleted.
+
+            $ ./clean-all
+
+            build your certificate authority
+
+            $ ./build-ca
+            pass:
+
+        iii) MAKE SOME KEYS
+
+            build server keys, set a strong password and answer “yes” to the last two questions, following the password.
+
+            $ ./build-key-server server
+                pass: 3
+
+            build the Diffie-Hellman PEM. It’s what OpenVPN uses to secure your client connections to the server.  Took hours!!!
+
+            $ sudo openssl dhparam 4096 > /etc/openvpn/dh4096.pem
+
+            The last key that you need from now is called an HMAC key. OpenVPN uses this key to sign each individual packet of information exchanged between the client and the server. It helps to prevent certain kinds of attacks on the connection. Was instanst??  
+
+            $ sudo openvpn --genkey --secret /etc/openvpn/certs/keys/ta.key
+
+->>       iv) Server Configuration
+
+             Debian provides a base configuration that you can use to get started. So, begin by getting that configuration file.
+
+             $ sudo gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz > /etc/openvpn/server.conf
+
+             Use you’re text editor again to open up /etc/openvpn/server.conf. The first things you need to find are the ca, cert, and key files. You need to set them to match the actual locations of the files that you created, which are all in /etc/openvpn/certs/keys.
+
+                ca /etc/openvpn/certs/keys/ca.crt
+                cert /etc/openvpn/certs/keys/server.crt
+                key /etc/openvpn/certs/keys/server.key  # This file should be kept secret
+
+
+            Find the dh setting, and change it to match the Diffie-Hellman .pem that you created.
+                dh dh4096.pem
+
+            Set the path for your HMAC key too.
+                tls-auth /etc/openvpn/certs/keys/ta.key 0
+
+            Find the cipher and make sure it matches the example below.
+                cipher AES-256-CBC
+
+            The next couple of options are there, but they’re commented out with a ;. Remove the semicolons in front of each option to enable them.
+
+                push "redirect-gateway def1 bypass-dhcp"
+
+                push "dhcp-option DNS 208.67.222.222"
+                push "dhcp-option DNS 208.67.220.220"
+
+            Look for the user and group options. Uncomment them, and change the user to “openvpn.”
+
+                user openvpn
+                group nogroup
+
+            
+            Finally, these last two lines aren’t in the default configuration. You’ll need to add them at the end of the file.
+
+                # Authentication Digest
+                auth SHA512
+
+                # Limit Ciphers
+                tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-128-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-128-CBC-SHA
+
+            That is all. Save and exit
+
+        v) Start the Server
+            Before you can start up the server, you need to make that openvpn user that you specified.
+
+            $ sudo adduser --system --shell /usr/sbin/nologin --no-create-home openvpn
+
+            Now, start up the server.
+
+            $ sudo systemctl start openvpn
+            $ sudo systemctl start openvpn@server
+
+            Check that they’re both running
+
+            $ sudo systemctl status openvpn*.service
+
+            If everything looks good, enable them at startup.
+
+            $ sudo systemctl enable openvpn
+            $ sudo systemctl enable openvpn@server
+
+        vi) Client keys Setup
+
+            $ sudo su
+            $ cd /etc/openvpn/certs
+            $ source ./vars
+            $ ./build-key client        The process is almost identical to the server one, so follow the same procedure.
+                pass: 3   and say yes to both questions
+
+        vii) Client config (still on the PI)
+            Change into the client directory. Then, unpack the sample configuration.
+
+            $ cd /etc/openvpn/client
+            $ sudo cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /etc/openvpn/client/client.ovpn
+
+            Open the client.ovpn in nano
+
+            Then, find the remote option. Assuming you’re not already using a VPN, Google search “What is my IP.” Take the address that it displays, and set the remote IP address to it. Leave the port number.
+
+                remote 107.150.28.83 1194 #That IP ironically is a VPN
+
+            Change the certs to reflect the ones you created, just like you did with the server.
+
+                ca /etc/openvpn/certs/keys/ca.crt
+                cert /etc/openvpn/certs/keys/client.crt
+                key /etc/openvpn/certs/keys/client.key
+
+            Find the user options, and uncomment them. It’s fine to run the clients as nobody.
+
+                user nobody
+                group nogroup
+
+            Uncomment the tls-auth option for HMAC.
+
+                tls-auth ta.key 1
+
+            Next, look for the cipher option and make sure that it matches the server.
+
+                cipher AES-256-CBC
+
+            Then, just add the authentication digest and cipher restrictions at the bottom of the file.
+
+                # Authentication Digest
+                auth SHA512
+
+                # Cipher Restrictions
+                tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-128-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-128-CBC-SHA
+
+            When everything looks right, save the file and exit. Use tar to pack up the configuration and the certs, so you can send them over to the client.
+
+            $ sudo tar cJf /etc/openvpn/clients/client.tar.xz -C /etc/openvpn/certs/keys ca.crt client.crt client.key ta.key -C /etc/openvpn/clients/client.ovpn
+
+            Transfer that package to the client however you choose. SFTP, FTP, and a USB drive are all great options.
+
+    -- Port Forwarding on Router --
+        type: TCP/UDP
+        port starting: 1194
+        port ending: 1194 (must be same as start)
+        ip: raspberry ip: 192.168.0.21
+        
+    -- Connect to Client --
+
+        On Linux, you need to install OpenVPN a lot like you did for the server.
+
+        $ sudo apt install openvpn
+        Then, change into /etc/openvpn, and unpack the tarball that you sent over.
+
+        $ cd /etc/openvpn
+        $ sudo tar -xvf /path/to/client.tar.xz
+        Rename the client file.
+
+        $ sudo mv client.ovpn client.conf
+
+        Run openvpn
+
+        $ sudo openvpn --config client.conf
