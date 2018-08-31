@@ -143,7 +143,7 @@ class YoloV2Yad2k(ObjectDetectionModel):
 
 def main():
     # Change dir to this script location
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    #os.chdir(os.path.dirname(os.path.abspath(__file__)))
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1' #force to run on CPU (GPU-tf not working properly)
 
     yolo_v2 = YoloV2Yad2k()

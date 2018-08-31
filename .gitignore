@@ -103,3 +103,11 @@ ENV/
 #opeanai gym
 openai-gym/
 courses/coursera - deeplearning/Course 5 - Recurrent NN/coursera-deepnn-5-week3b.tar.gz
+practice-projects/neighborhood-watch/models/yolo-dnn/yolov3_keras_todo/model/yolov3.h5
+practice-projects/neighborhood-watch/models/yolo-dnn/yolov3_keras_todo/weights/yolov3.weights
+practice-projects/neighborhood-watch/models/yolo-dnn/yolov3_mystic123_tensorflow/yolov3.weights
+practice-projects/neighborhood-watch/models/yolo-dnn/yolov3_mystic123_tensorflow/yolov3-tiny.weights
+practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov3.h5
+practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov3.weights
+practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov2.weights
+practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov2.h5
