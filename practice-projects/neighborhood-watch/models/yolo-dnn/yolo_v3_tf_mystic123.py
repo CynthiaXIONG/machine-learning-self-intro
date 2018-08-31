@@ -24,12 +24,13 @@ class YoloV3Mystic123(ObjectDetectionModel):
     name = "YoloV3Mystic123"
 
     def __init__(self, score_threshold=0.6, iou_threshold=0.5, use_tiny=False):
+        #tiny model not working...
 
-        classes_path="yolov3_mystic123_tensorflow/coco.names"
-        weights_path="yolov3_mystic123_tensorflow/yolov3.weights"
+        classes_path = os.path.join(os.path.dirname(__file__), "yolov3_mystic123_tensorflow/coco.names")
+        weights_path = os.path.join(os.path.dirname(__file__), "yolov3_mystic123_tensorflow/yolov3.weights")
         if (use_tiny):
             self.name = "YoloV3TinyMystic123"
-            weights_path="yolov3_mystic123_tensorflow/yolov3-tiny.weights"
+            weights_path = os.path.join(os.path.dirname(__file__), "yolov3_mystic123_tensorflow/tiny.weights")
         
         self.score_threshold = score_threshold
         self.iou_threshold = iou_threshold
@@ -69,6 +70,9 @@ class YoloV3Mystic123(ObjectDetectionModel):
         # Save the predicted bounding box on the image
         image.save(self._get_output_filename(image_file_name), quality=90)
 
+        #return result
+        return self._build_result_output(filtered_boxes, self.classes);
+
     def _generate_colors(self, class_names):
         hsv_tuples = [(x / len(class_names), 1., 1.) for x in range(len(class_names))]
         colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
@@ -78,8 +82,21 @@ class YoloV3Mystic123(ObjectDetectionModel):
         random.seed(None)  # Reset seed to default.
         return colors
 
+    def _build_result_output(self, boxes, cls_names):
+        result = []
+        for cls, bboxs in boxes.items():
+            num_bboxs = len(bboxs)
+            if (num_bboxs > 0):
+                item = {}
+                item["name"] = cls_names[cls]
+                item["count"] = num_bboxs
+                result.append(item)
+
+        return result
+
     def _draw_boxes(self, boxes, image, cls_names, detection_size, colors):
-        font = ImageFont.truetype(font='font/consola.otf',size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+        font_path = os.path.join(os.path.dirname(__file__), "font/consola.otf")
+        font = ImageFont.truetype(font=font_path,size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 500
 
         draw = ImageDraw.Draw(image)
@@ -131,7 +148,7 @@ class YoloV3Mystic123(ObjectDetectionModel):
 #--------- MAIN ---------#
 def main(argv=None):
 
-    yolo_v3_model = YoloV3Mystic123(use_tiny=True)
+    yolo_v3_model = YoloV3Mystic123()
 
     yolo_v3_model.predict("person")
     yolo_v3_model.predict("dog")
@@ -144,5 +161,5 @@ def main(argv=None):
 if __name__ == "__main__":
     # Change dir to this script location
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-    tf.app.run()
+ 
+    tf.app.run() #runs faster than just calling main
