@@ -58,9 +58,8 @@ local_settings.py
 instance/
 .webassets-cache
 
-# Scrapy stuff:
-.scrapy
-
+# Private stuff:
+private.py
 # Sphinx documentation
 docs/_build/
 
@@ -102,6 +101,8 @@ ENV/
 
 #opeanai gym
 openai-gym/
+
+#big files
 courses/coursera - deeplearning/Course 5 - Recurrent NN/coursera-deepnn-5-week3b.tar.gz
 practice-projects/neighborhood-watch/models/yolo-dnn/yolov3_keras_todo/model/yolov3.h5
 practice-projects/neighborhood-watch/models/yolo-dnn/yolov3_keras_todo/weights/yolov3.weights
