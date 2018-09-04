@@ -49,19 +49,20 @@ class YoloV3Mystic123(ObjectDetectionModel):
                 self.detections = yolo_v3_tiny(self.inputs, len(self.classes), data_format='NCHW')
             else:
                 self.detections = yolo_v3(self.inputs, len(self.classes), data_format='NCHW')
-            self.load_ops = load_weights(tf.global_variables(scope='detector'), weights_path)
+            load_ops = load_weights(tf.global_variables(scope='detector'), weights_path)
 
         self.boxes = detections_boxes(self.detections)
+
+        #start the session
+        self.tf_session = tf.Session()
+        self.tf_session.run(load_ops)
 
     def predict(self, image_file_name):
 
         image = Image.open(self._get_input_filename(image_file_name))
         image_resized = image.resize(size=(self.model_input_size,self.model_input_size))
 
-        with tf.Session() as sess:
-            sess.run(self.load_ops)
-
-            detected_boxes = sess.run(self.boxes, feed_dict={self.inputs: [np.array(image_resized, dtype=np.float32)]})
+        detected_boxes = self.tf_session.run(self.boxes, feed_dict={self.inputs: [np.array(image_resized, dtype=np.float32)]})
 
         filtered_boxes = non_max_suppression(detected_boxes, confidence_threshold=self.score_threshold, iou_threshold=self.iou_threshold)
 

@@ -47,7 +47,8 @@ def check_for_new_images(db):
     image_extension = "jpg"
     new_images = []
     
-    #check the share samba directory
+    # check the share samba directory
+    # get new images, copy to local cache and delete them
     smb_conn = SMBConnection(nw_settings.SAMBA_USER, nw_settings.SAMBA_PALAVRA_CHAVE, "nw_server", "diogo")
     connected = smb_conn.connect(nw_settings.SAMBA_SERVER_ADDRESS)
 
@@ -62,7 +63,7 @@ def check_for_new_images(db):
                         image_name = file_name_parts[0] 
                         db_entry = db.query(ItemEntry).filter_by(id=image_name).first() #check if already processed
                         if db_entry is None:
-                            new_images.append(image_name)
+                            new_images.append({"name":image_name, "create_time":shared_file.create_time})
                             fo = open(os.path.join(nw_settings.CACHED_IMAGES_INPUT_PATH, shared_file.filename), "wb")
                             smb_conn.retrieveFile(share.name, "{0}/{1}".format(nw_settings.SAMBA_CAMERA_PHOTO_PATH, shared_file.filename), fo)
                             fo.close()
@@ -91,8 +92,10 @@ def check_for_new_images(db):
         dst_path = os.path.join(cached_img_path, "{0}.{1}".format(new_image, image_extension))
         shutil.copy2(src_path, dst_path)
     '''
+    # return sorted by create time (to be processed by the correct order)
+    new_images.sort(key=lambda x: x["create_time"])
 
-    return new_images
+    return [x["name"] for x in new_images]
 
 
 def add_entry_to_db(new_image, result, db):
