@@ -23,6 +23,11 @@ import nw_settings
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../models/yolo-dnn'))
 from yolo_v3_tf_mystic123 import YoloV3Mystic123
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../utils'))
+from profile_timer import ProfileTimer
+
+profile_timer = ProfileTimer()
+
 #create db entry
 Base = declarative_base()
 class ItemEntry(Base):
@@ -44,6 +49,8 @@ def load_db():
     return Session()
 
 def check_for_new_images(db):
+    profile_timer.start_scope("check_for_new_images")
+
     image_extension = "jpg"
     new_images = []
     
@@ -99,6 +106,8 @@ def check_for_new_images(db):
 
 
 def add_entry_to_db(new_image, result, db):
+    profile_timer.start_scope("add_entry_to_db")
+
     #check if already exists
     entry = db.query(ItemEntry).filter_by(id=new_image).first()
     if entry is None:
@@ -121,6 +130,7 @@ def add_entry_to_db(new_image, result, db):
 
 
 def post_result_to_slack(new_image, result, slack_client):
+    profile_timer.start_scope("post_result_to_slack")
     found_msg = ""
     for item in result:
         found_msg += ("{0}x{1}, ".format(item["count"], item["name"]))
@@ -139,13 +149,15 @@ def main():
     #create slack client
     slack_client = SlackClient(nw_settings.SLACK_TOKEN)
 
+    loop_count = 0
     while True:
-        print("{}: Starting new server cycle".format(time.ctime()))
+        #print("{}: Starting new server cycle".format(time.ctime()))
         #check OG image path and copy new images to cached input image path
         new_images = check_for_new_images(db)
 
         #infere new image
         for new_image in new_images:
+            profile_timer.start_scope("model.predict")
             result = model.predict(new_image)
             #add to db
             entry_added = add_entry_to_db(new_image, result, db)
@@ -153,7 +165,13 @@ def main():
             if (entry_added):
                 post_result_to_slack(new_image, result, slack_client)
 
-        print("{}: Successfully finished server cycle".format(time.ctime()))
+        profile_timer.end_scope()
+
+        #print("{}: Successfully finished server cycle".format(time.ctime()))
+        loop_count += 1
+        if (loop_count % 10):
+            print(profile_timer.scopes)
+
         time.sleep(nw_settings.SLEEP_INTERVAL)
 
 def test():
