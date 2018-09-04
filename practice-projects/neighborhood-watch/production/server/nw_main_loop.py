@@ -64,7 +64,7 @@ def check_for_new_images(db):
         if (share.name == nw_settings.SAMBA_SHARED_FILE_NAME):
             shared_files = smb_conn.listPath(share.name, nw_settings.SAMBA_CAMERA_PHOTO_PATH)
             for shared_file in shared_files:
-                if (not shared_file.isDirectory):
+                if (shared_file.file_size > 0 and not shared_file.isDirectory):
                     file_name_parts = shared_file.filename.split('.')
                     if (len(file_name_parts) == 2 and file_name_parts[1] == image_extension): #check if image file
                         image_name = file_name_parts[0] 
@@ -138,6 +138,12 @@ def post_result_to_slack(new_image, result, slack_client):
 
     slack_client.api_call("chat.postMessage", channel=nw_settings.SLACK_CHANNEL, text=msg, username='nw-bot', icon_emoji=':owl:')
 
+def post_number_of_people(nof_people, slack_client):
+    profile_timer.start_scope("post_number_of_people")
+   
+    msg = "NOF People:{0}".format(nof_people)
+    slack_client.api_call("chat.postMessage", channel=nw_settings.SLACK_CHANNEL, text=msg, username='nw-bot', icon_emoji=':owl:')
+
 
 def main():
     #load model and db
@@ -149,6 +155,8 @@ def main():
     #create slack client
     slack_client = SlackClient(nw_settings.SLACK_TOKEN)
 
+    person_counter = 0
+    current_nof_people = 0
     loop_count = 0
     while True:
         #print("{}: Starting new server cycle".format(time.ctime()))
@@ -161,9 +169,16 @@ def main():
             result = model.predict(new_image)
             #add to db
             entry_added = add_entry_to_db(new_image, result, db)
+            
             #post to slack
             if (entry_added):
-                post_result_to_slack(new_image, result, slack_client)
+                #post_result_to_slack(new_image, result, slack_client)
+                for item in result:
+                    if (item["name"] == "person"):
+                        if (item["count"] > current_nof_people):
+                            person_counter += item["count"] - current_nof_people
+                            post_number_of_people(person_counter, slack_client)
+                        current_nof_people = item["count"]
 
         profile_timer.end_scope()
 
@@ -173,6 +188,7 @@ def main():
             print(profile_timer.scopes)
 
         time.sleep(nw_settings.SLEEP_INTERVAL)
+
 
 def test():
     pass

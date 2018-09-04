@@ -4,7 +4,7 @@ import os
 
 SLACK_TOKEN = os.getenv('SLACK_TOKEN', "") # should be put in private.py, or set as an environment variable..
 SLACK_CHANNEL = "neighborhood_watch"
-SLEEP_INTERVAL = 10 # in seconds
+SLEEP_INTERVAL = 1 # in seconds
 
 
 OG_IMAGES_INPUT_PATH = os.path.join(os.path.dirname(__file__), './og_input_test') # original input path of the images
