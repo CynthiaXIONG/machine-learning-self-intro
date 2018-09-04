@@ -150,16 +150,11 @@ def main(argv=None):
 
     yolo_v3_model = YoloV3Mystic123()
 
-    yolo_v3_model.predict("person")
-    yolo_v3_model.predict("dog")
-    #yolo_v3_model.predict("pi1")
-    #yolo_v3_model.predict("pi2")
-    #yolo_v3_model.predict("pi3")
-    #yolo_v3_model.predict("pi4")
+    yolo_v3_model.predict("pi3")
 
 
 if __name__ == "__main__":
     # Change dir to this script location
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
  
-    tf.app.run() #runs faster than just calling main
+    tf.app.run() #runs faster than just calling main in debug atleast

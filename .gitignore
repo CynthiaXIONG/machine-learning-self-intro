@@ -112,3 +112,5 @@ practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov3.h5
 practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov3.weights
 practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov2.weights
 practice-projects/neighborhood-watch/models/yolo-dnn/yad2k/model_data/yolov2.h5
+practice-projects/neighborhood-watch/production/server/cached_input
+practice-projects/neighborhood-watch/production/server/output

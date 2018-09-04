@@ -3,6 +3,7 @@ import sys
 import time
 import datetime
 import traceback
+import shutil
 
 import json
 
@@ -12,6 +13,9 @@ from sqlalchemy import Column, String, DateTime, JSON
 from sqlalchemy.orm import sessionmaker
 
 from slackclient import SlackClient
+
+import urllib
+from smb.SMBConnection import SMBConnection #pysmb lib
 
 sys.path.append(os.path.dirname(__file__))
 import nw_settings
@@ -39,20 +43,67 @@ def load_db():
     Session = sessionmaker(bind=engine)
     return Session()
 
-def fetch_new_images(db):
-    pass
+def check_for_new_images(db):
+    image_extension = "jpg"
+    new_images = []
+    
+    #check the share samba directory
+    smb_conn = SMBConnection(nw_settings.SAMBA_USER, nw_settings.SAMBA_PALAVRA_CHAVE, "nw_server", "diogo")
+    connected = smb_conn.connect(nw_settings.SAMBA_SERVER_ADDRESS)
+
+    shares_devices = smb_conn.listShares()
+    for share in shares_devices:
+        if (share.name == nw_settings.SAMBA_SHARED_FILE_NAME):
+            shared_files = smb_conn.listPath(share.name, nw_settings.SAMBA_CAMERA_PHOTO_PATH)
+            for shared_file in shared_files:
+                if (not shared_file.isDirectory):
+                    file_name_parts = shared_file.filename.split('.')
+                    if (len(file_name_parts) == 2 and file_name_parts[1] == image_extension): #check if image file
+                        image_name = file_name_parts[0] 
+                        db_entry = db.query(ItemEntry).filter_by(id=image_name).first() #check if already processed
+                        if db_entry is None:
+                            new_images.append(image_name)
+                            fo = open(os.path.join(nw_settings.CACHED_IMAGES_INPUT_PATH, shared_file.filename), "wb")
+                            smb_conn.retrieveFile(share.name, "{0}/{1}".format(nw_settings.SAMBA_CAMERA_PHOTO_PATH, shared_file.filename), fo)
+                            fo.close()
+                            smb_conn.deleteFiles(share.name, "{0}/{1}".format(nw_settings.SAMBA_CAMERA_PHOTO_PATH, shared_file.filename))
+
+    smb_conn.close()
+
+    #Old version without samba shared folder
+    '''
+    all_files = os.scandir(og_img_path)
+    new_images = []
+
+    for file_entry in all_files:
+        if (file_entry.is_file()):
+            file_name_parts = file_entry.name.split('.')
+            if (len(file_name_parts) == 2 and file_name_parts[1] == image_extension): #check if image file
+                image_name = file_name_parts[0] 
+
+                db_entry = db.query(ItemEntry).filter_by(id=image_name).first() #check if already processed
+                if db_entry is None:
+                    new_images.append(image_name)
+
+    #copy to cached image path
+    for new_image in new_images:
+        src_path = os.path.join(og_img_path, "{0}.{1}".format(new_image, image_extension))
+        dst_path = os.path.join(cached_img_path, "{0}.{1}".format(new_image, image_extension))
+        shutil.copy2(src_path, dst_path)
+    '''
+
+    return new_images
+
 
 def add_entry_to_db(new_image, result, db):
-    #id is the image name
-    id = new_image
     #check if already exists
-    entry = db.query(ItemEntry).filter_by(id=id).first()
+    entry = db.query(ItemEntry).filter_by(id=new_image).first()
     if entry is None:
         #get current timestamp
         current_time = datetime.datetime.now()
         
         entry = ItemEntry(
-            id=id,
+            id=new_image,
             date=current_time,
             data=json.dumps(result)
         )
@@ -75,12 +126,11 @@ def post_result_to_slack(new_image, result, slack_client):
     slack_client.api_call("chat.postMessage", channel=nw_settings.SLACK_CHANNEL, text=msg, username='nw-bot', icon_emoji=':owl:')
 
 
-if __name__ == "__main__":
-    # Change dir to this script location
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
+def main():
     #load model and db
     model = YoloV3Mystic123()
+    model.set_image_paths(nw_settings.CACHED_IMAGES_INPUT_PATH, nw_settings.IMAGES_OUTPUT_PATH)
+
     db = load_db()
 
     #create slack client
@@ -88,8 +138,8 @@ if __name__ == "__main__":
 
     while True:
         print("{}: Starting new server cycle".format(time.ctime()))
-        #fetch new untested images
-        new_images = ["dog", "person", "pi1", "test"] #fetch_new_images(db)
+        #check OG image path and copy new images to cached input image path
+        new_images = check_for_new_images(db)
 
         #infere new image
         for new_image in new_images:
@@ -102,3 +152,14 @@ if __name__ == "__main__":
 
         print("{}: Successfully finished server cycle".format(time.ctime()))
         time.sleep(nw_settings.SLEEP_INTERVAL)
+
+def test():
+    pass
+
+
+if __name__ == "__main__":
+    # Change dir to this script location
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    main()
+
