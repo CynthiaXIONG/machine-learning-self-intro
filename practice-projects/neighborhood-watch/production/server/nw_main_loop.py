@@ -173,12 +173,17 @@ def main():
             #post to slack
             if (entry_added):
                 #post_result_to_slack(new_image, result, slack_client)
+                found_persons = False
                 for item in result:
                     if (item["name"] == "person"):
                         if (item["count"] > current_nof_people):
                             person_counter += item["count"] - current_nof_people
                             post_number_of_people(person_counter, slack_client)
                         current_nof_people = item["count"]
+                        found_persons = True
+
+                if not found_persons:
+                    current_nof_people = 0
 
         profile_timer.end_scope()
 

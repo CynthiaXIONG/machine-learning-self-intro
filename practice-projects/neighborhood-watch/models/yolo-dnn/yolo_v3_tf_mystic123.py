@@ -110,9 +110,10 @@ class YoloV3Mystic123(ObjectDetectionModel):
                 for i in range(thickness): #hacky way to draw thick rectangles
                     draw.rectangle((np.array(box) + i).tolist(), outline=colors[cls])
 
-                    
-                draw.text(box[:2], label, fill=(0, 0, 0), font=font)
-
+                text_origin = np.array(box[:2])
+                label_size = np.array(draw.textsize(label, font))
+                draw.rectangle([tuple(text_origin), tuple(text_origin + label_size)], fill=colors[cls])
+                draw.text(text_origin.tolist(), label, fill=(0, 0, 0), font=font)
 
                 """
                 label_size = draw.textsize(label, font)
