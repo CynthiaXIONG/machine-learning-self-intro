@@ -79,7 +79,7 @@
 
         - OR -
             Within Windows Explorer try \\YourHostName\YourShareName, or from the Linux file manager try smb://YourHostName/YourShareName.
-
+            e.g: \\raspberrypi\picamera_shared
 
 --- Setup VPN (to enable remote desktop from work into my PCs) ---
     https://www.pcmech.com/article/raspberry-pi-vpn-access-network/
