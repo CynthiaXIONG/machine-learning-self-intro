@@ -78,9 +78,8 @@
             Note: The default user group of samba is "WORKGROUP".
 
         - OR -
-            Within Windows Explorer try \\raspberrypi\picamera_shared, (https://www.techrepublic.com/article/how-to-connect-to-linux-samba-shares-from-windows-10/)
-             or from the Linux file manager try smb://YourHostName/YourShareName.
-
+            Within Windows Explorer try \\YourHostName\YourShareName, or from the Linux file manager try smb://YourHostName/YourShareName.
+            e.g: \\raspberrypi\picamera_shared
 
 --- Setup VPN (to enable remote desktop from work into my PCs) ---
     https://www.pcmech.com/article/raspberry-pi-vpn-access-network/
