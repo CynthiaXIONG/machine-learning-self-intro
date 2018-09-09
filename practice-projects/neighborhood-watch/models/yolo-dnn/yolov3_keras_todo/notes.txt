@@ -1,0 +1,4 @@
+based on: 
+    . https://blog.paperspace.com/how-to-implement-a-yolo-object-detector-in-pytorch/based on: https://blog.paperspace.com/how-to-implement-a-yolo-object-detector-in-pytorch/
+    . yad2k
+    . https://github.com/xiaochus/YOLOv3

@@ -1,0 +1,12 @@
+goal: use object detection to count how many people pass during the day in the street in front of my apartment
+
+workflow:
+    1- Get pipeline working
+        i-take pictures at regular intervals
+        ii-evaluate picture to count number of people
+        iii- store the number with a timestamp in a db
+        iv - count number of people passing using simple euristic: number of people passing = number of increments to current number of people
+        
+
+similar work:
+    https://www.pyimagesearch.com/2018/08/13/opencv-people-counter/
