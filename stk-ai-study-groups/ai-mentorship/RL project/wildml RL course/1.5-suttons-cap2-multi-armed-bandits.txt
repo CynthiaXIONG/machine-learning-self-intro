@@ -1,0 +1,81 @@
+--- Suttons Book - Chapter 2 - Multi-armed Bandits ---
+
+    RL uses traning information that evaluates the actions taken rather than instructs by giving correct actions.
+     -> evaluative feedback (that depenends entirely on the action taken)
+
+    -- A k-armed Bandit Problem --
+        . simple setting for RL exploration
+            . at each step you have 'k' different options/actions. 
+            . after each action you recive a numerical reward chosen from a stationary probability distribution
+            . the objective is to maximize the expected total rewward over some period
+
+        . the imediate reward received after an action = Rt
+        . the expected/mean reward for each action - value = Qt
+
+            Q(a) = E(Rt|At=a)    -> E = Expected probability
+
+        . if you knew the value of each action, it would trivial to solve the problem.
+        . so if you dont, you must try to estimate it
+
+        . because you have uncertainity about some actions, their estimated value might not correct (and lower than the real value), so exploring this options might be a good strategy in the long run
+        . exploitation gives you the best short term reward, but exploration might improve your long run rewards
+        . Balance between exploration and exploitation is needed (probably an higher focus on exploration in the beggining and later once the values are better estimated, focus more on exploration of these)
+
+    -- Action-value Methods --
+        -> true value of an action: mean reward
+        . this methods allow the estimation of the value of an action
+
+        Qt(a) = sum_rewards_a / nof_a  <- simple average methods
+
+        At = argmax Qt(a)  <- greedy action selection method (pick the action with highest estimated value!)
+            . maximizes immediate reward
+
+        - ε-greedy method 
+            behave greedy most of the time, but once in a while (determined by the small probability ε) select random action
+
+        optimal method: explore until you find the optimal action and then use this action and never explore anymore (if the probablem is stationary and the values dont change over time)
+
+        . performing the simple average requires lots of memory...
+            -> update rule estimation:
+                new_estimation = old_estimate + step_size * (target - old_estimate)      step_size = 1/n or α (update rate)
+
+        
+    -- Nonstationary Problem --
+     . reward probability change over time
+        -> should priority recent rewards than long-past rewards
+
+        . use a custom α for the update rule (bigger than in average calculation (1/n))
+            changing the simple average to a weighted average
+
+        . even better, have exponentially smaller weights for each older value (weight decays exponenitally)
+            -> Exponential Recency-weighted Average
+    
+    
+    -- Optimistic Inital Values:
+        . setting overely optmistic initial values (very high), will encourage exploration as once the agent has tried this option, it will update is estimate with a more realistic value (and less than the initial estimate), thus picking the next optimisticly-initialized value action for the next time and so it explore at least once all options right at the first interactions
+
+    
+    -- Upper-Confidence-Bound Action Selection --
+        . exploration is needed because there is always uncertainty about the action-value estimates
+        . ε-greedy selects actions purely randomly
+        . UCB selects among the non-greedy actions according to theri potential for being optimal, taking into account how good/certain their estimates armed
+
+            At = argmax(Qt(a) + c*sqrt(ln(t) / Nt(a)))
+
+                . Nt(a) -> number of times the action 'a' has been selected prior to time 't'
+
+            . the square root term measure the uncertainity/variance in the estimate of 'a' value -> has Nt(a) increases, the uncertainty decreases 
+            . 'c' is the confidence level (c = 2 is good value for the k-bandit problem)
+
+        ->> Actions that have already been selected frequently, will be selected with decreasing frequency over time -> encourages exploration of less "chosen" actions
+
+
+    -- Gradient Bandit Algorithms --
+        . using gradient descent to learn a numerical preference for each action (not the value/estiamted reward), based on the baseline reward (simple reward average or average weighted) and the immediate reward obtained, calcultaing and "error"/delta from these and updating the preference in relation to this correction (immediate reward is higher, than increase preference and vice-versa)
+
+    
+    -- Associative Search (Contextual Bandits) --
+        . there is a need to associate different actions with different situations
+        . e.g: at each step you get a different k-armed bandit (different rewards/distributions)
+            . if each k-armed bandit has something that lets you identify the different ones, you can learn a policy that associates different values/actions to the different k-armed bandits
+

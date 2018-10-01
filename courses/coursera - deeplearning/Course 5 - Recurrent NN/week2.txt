@@ -43,7 +43,7 @@
     -- Learning Word Embeddings --
         - Using a Neural Language Model -
             . paper: Bengio, 2003, A neural probabilistic language model
-            . use a window to predic of precceding words to predict the next word in a text (like 4 last words -> context), feed the e_is of these words and use a fullyconnected (stacking the e_is) layer where these are feed and a softmax to predic the word (and train this way the E matrix by back prop)
+            . use a window of precceding words to predict the next word in a text (like 4 last words -> context), feed the e_is of these words and use a fullyconnected (stacking the e_is) layer where these are feed and a softmax to predic the word (and train this way the E matrix by back prop)
             . use the same E for all words
             -> This will learn pretty decent the words embbeddings
                 . one of the early algorithms (2003), but quite effective

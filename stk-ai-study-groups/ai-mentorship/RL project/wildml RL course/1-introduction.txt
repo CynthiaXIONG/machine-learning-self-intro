@@ -1,0 +1,83 @@
+--- Reinforcement Learning Intro ---
+ . goal-directed learning from interactions
+ . learning agent must be able to sense the state of its environment and must be table to take actions that affect the state
+    - sensation, action, goal
+    - learning from its own experience, and NOT from generalizing data label by an external supervisor (supervised learning)
+. tradeoff: exploration vs exploitation
+    . exploitation: prefer actions that is has tried in the past and found to be effective
+    . exploration: try actions it hasnt tried before in an attempt to find better ones
+
+    Elements of RL:
+
+    - Policy: 
+        . defines the learning agents behaviour at a given time
+        . mapping from states to actions
+
+    - Reward:
+        . defines goal of the RL problem
+        . on each time step, the environment sends to the agen a single number called Reward -> immediate feedback
+            - RL agents goal is to maximize the total reward it receives over the long run
+
+    - Value Function:
+        . prediction of expected future reward
+        . is the total amount of reward the agend can expect to accumulate over the future -> long run expectation
+        . the rewards determine the immediate desirability of the states, while the values indicates the long-run desirability of states after taking into account the states that are likely to follow
+        . delayed reward!
+        . values must be estimated
+
+    - Model:
+        . something that 'mimics' the behaviour of the environment
+        . allows inferences to be made about how the enviroment will behave
+            - given a state and an action, model might prefict the resultant next state and next reward\
+        . used for planning
+            . can predict the next state -> Transition Model
+            . can predict the next (immediate) rewad -> Reward Model
+        . IS AN OPTIONAL ELEMENT FOR AN RL-METHOD
+            . there are:
+                 - Model-Based RL methods 
+                 - Model-Free Rl methods
+                    . explicitly trial-and-error learners (opposite of planning)
+
+    History and State
+        - History H(t):
+            . sequence of observations, actions and rewards
+            . all observable variables up to time 't'
+        - State S(t):
+            . 'summary' of the history information used to determine what happens next ->  S(t) = f(H(t)) 
+
+            . agent state -> agents internal representation
+            . information state -> aka Markov State -> contains all useful information from the history
+                . this state has all the information needed, so we can disregard all the past states (the current state already has all the info from the history it needs, no new information from the past is helpful)
+                    -> The Future is independent of the Past given the Present
+                    -> The Present state is a sufficicent statistic of the Future
+
+            . enviroment state -> environment's private representation (for example the emulator variables)
+                . usually not visible to the agent, unless is a fully observable enviroment
+                . this is a Markov State
+
+                . partially observable environment
+                    . agent indirectly observes environment
+                        (e.g: poker agent only observes public cards and not every player card)
+
+    
+    Categorizing Agents based on its components:
+        . Value Based:
+            -> Has a Value Function, stored and updated for each state
+            -> Doenst have a explicit policy (the policy is implicit, resulting in just greedly picking the action that results in a state with higher Value)
+
+        . Policy Based:
+            -> Has an explicit Policy, that it store for each state
+            -> Does not explicitly store the value function for each state... 
+
+        . Actor Critic:
+            -> Has/Stores both Policy and Value Function (tries to combine best of both worlds)
+
+        
+
+
+        
+
+        
+
+
+    

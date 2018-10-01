@@ -1,0 +1,67 @@
+### Pattern Recognition and Machine Learning - Christopher Bishop ###
+
+feature extraction: pre-process of the input data, so make it less variable 
+    e.g: for digit recongnition, images of the digits are translated and scaled so that each digit is contained with a box of fixed size
+
+    or to speed up computation
+        e.g: for real-time face detection in high-res video, instead of using the pixels (too heavy) find other useful features that are fast to compute but stil preserve useful information that enables faces to be distinguished from non-faces and use this as input to the face-detection algorithm (such as: average value of image intensity over a rectangular subregion can be evaulated very fast and a set of such features can be used for a fast face detector)
+
+            -> because the such feature is smaller than the raw number of pixels, this kind of preprocessing results in dimensionality reduction 
+                . in dimensionality reduction, one must be caregul not to discard importante information for the model
+
+
+sum-of-squares error: E = 1/2 * sum(y - y^)^2   
+    . the 1/2 is included for later convience (for its derivative calculation in the back prop!!)
+    . squares error also has the nice property of being non-negative (quadratic function), so errors from different traning sets can't cancel each other just because they are delta in opposite directions
+    . quadratic function also means:
+        -linear derivatives, can be completly solved (closed form, no free unknown variables to solve) -> unique solution for minimization (one abs minima)
+
+root-mean-square error: E_rms = sqrt(2*E/N)
+    . allow comparision of errors between different sizes of data sets (the division by N more specifically)
+
+L2 regularization: 
+    . shrinking method -> adds penalty term to the error function in order to discourage the coefs/weights from reaching alrge values
+    . aka quadratic regularizer or ridge regression or weight decay
+    
+    
+
+Probability Theory:
+    P(x,y) = P(y|x)*P(x) -> conditional probabliity : product rule
+    P(x) = sum_y(P(x,y)) -> joint probabliity : sum rule
+    P(x,y) = P(y,x)
+    P(y|x) = P(x|y)*P(y) / P(x) -> Bayes Theorem
+    
+    prior probablity -> probability available before any observation/condition.
+        e.g: 2boxes with apples and oranges in each, asking what box was picked without any other information, use P(box)
+
+    posterior probability -> probability obtaind after an observation/condition.
+        e.g: knowing that the fruit picked was an orange, ask the what box was it picked P(box|fruit)
+
+        The Bayes Theorem is used to convert a prior probability into a posterior prob by incorporating new evidence provided by an observation
+            -> P(x|y) in the Bayes Theorem is also known as the the "likelihood function" -> expresses how probable the observed data is for different settings
+            Bayes Theorem -> posterior = likelihood x prior
+
+            the denonimator, P(x) is the normalization constant, which ensure that the posterior distribution is a valid probability density and integrates to one
+
+     Expection of f(x): E[f] = sum_x(P(x)*f(x))   -> average is weighted by the relative probabilities of the different values of sum_x
+        . for continues variables,the "sum" is an integral instead
+
+    Covariance of x,y : express the extent to which x and y vary together. if independant, cov[x,y]=0
+
+    Bayesian probability: quantification of uncertainty. something that the classical/frequentist probability cannot "count" (how many years until the ice caps metl? we can only estimate)
+        . p(D|w) probabliity of the dataset D that as an uncertainty expressed through a probability distrubition over was
+        
+
+
+    Gaussian Dist
+        . 2 parameters: mean and variance (standard_deviation^2)
+        . on average, the maximum likelihood estimate will obtain the correct mean but will underestimate the variance by a factor of (N-1)/N
+            -> this is called "Bias" -> results in overfitting
+            -> the bias of the maximum likelihood becomes less significant as the number N (of data points) increases -> (N-1)/negative
+            
+
+Decision Theory:
+    theory that allows us to make optiomal decisions i nsituations inveolving uncertainity
+    select the option with the largest posterior probability
+
+Information Theory:

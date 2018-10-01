@@ -130,7 +130,7 @@
 
                     . c~<t> = tanh(Wc[c<t-1>, x<t>] + b_c)  -> c~ is a candidate to replace/improve c
                     . gamma_u = [0-1] = sigmoid(Wu[c<t-1>, x<t>] + b_u)  -> update Gate, which because it uses the sigmoid function, is almost always either 0 or 1
-                        . This 'Update Gate' decides if c~ should replace calc
+                        . This 'Update Gate' decides if c~ should replace c
                         . e.g: c<t> could be is the word is plural or singular (c<t> = 1 for singular)
 
                     -> c<t> = gamma_u * c~<t> + (1 - gamma_u) * c<t-1>  (Update function, * is an element wise mult)
