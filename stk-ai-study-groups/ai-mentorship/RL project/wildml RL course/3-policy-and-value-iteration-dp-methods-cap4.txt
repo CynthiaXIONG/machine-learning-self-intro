@@ -1,7 +1,7 @@
 --- Dynamic Programming Methods - Policy and Value Iteration ---
     . Solving MDP (Bellmans optimialty equations for v*(s) and q*(s,a)) using iterative methods -> optimized by using DP
 
-    -> DP is a solution for planning (all knowledge of the environment is known, the transitions structre of the MDP is known) not for RL
+    -> DP is a solution for planning (all knowledge of the environment is known, the transitions structre of the MDP is known) not for RL (which is model-free)
 
     -- Policy Evaluation - Prediction --
         . calculate v_π (state-value function) for an arbitrary policy π  (evaluate a given policy)
@@ -12,7 +12,7 @@
         i. assign initial values arbitrarily (initial approximation)
         ii. sucessive approximations obtainde using the Bellman equation for v_π as an update rule:
             v_π_k+1 = Bellmans Eq using current v_π_k (for state s')
-        iii. stop the iteration once the convergion (v_π_k+1- v_π_k) is very small (update results in very little change)
+        iii. stop the iteration once the convergion (v_π_k+1- v_π_k) is very small (update results in very little change)+
 
         . the reason for computing this value fuction for "a policy" is to help find better policies
     
@@ -20,14 +20,18 @@
         . from state s we would like to know wether or not we should change th e policy and choose a != π(s)
             - if the q_π(s, π'(s)) >= v_π(s) , then we should!
                 . the state-action value by chosing different action is better than the current state value on the current policy
+                . select greedly the best first action for the whole MDP and then use the current policy/value function for the rest of the successor states
+                    -> if this initial_diff_action + rest_on_current_policy > all_way_on_current_policy than we should improve our policy (just for one step/action!)
 
             . we should consider changes to all states and to all posiible actions, and then selecing the max (greedy) action-state value to update the new policy
 
-                π'(s) = argmax_a(sum_s',r(p[s',r|s,a]*(r+γv_π(s')))
+                π'(s) = argmax_a(sum_s',r(p[s',r|s,a]*(r+γv_π(s')))   -> π' = greedy(v_π)
 
     -- Policy Iteration --
         . starting policy π -> improved using v_π to yield a better policy π' -> compute new v_π' and use it to get a even more improved π'' -> and so onnnnnnn
             . cycle of policy evaluation followed by policy Improvement
+            . always converges to π*
+            . if improvement stops at all (same values, for k+1) -> optimality has been reached! -> π* found
 
            ->> Policy iteration has two simulateneous processes:
             - making the value function consiste with the current policy (policy evaluation)
@@ -36,6 +40,13 @@
         . drawback: each iteration involves policy evaluation which is an iterative computation that can be expensive!
 
     -- Value Iteration --  
+        review note on optimality:
+            . optimal policy can be divided into 2 components:
+                - optimal first action A*
+                - followed by an optimal policy from successor state S'
+            
+            . no need to look at whole problem at once to figure the optimal value, just do a one-step looked ahead at each iteration
+
         . if the policy evaluation is done iteratively, it only converges to the real v_π in the limit (num_iterations = inf)
         . what if we dont have to have a very accurate value of the real v_π and instead stop the convergion/iteration process early?
             -> What if we stop just after one iteration/sweep of all states? the value for v_π_k where k=1 is already somewhat close to the real v_k
@@ -47,7 +58,7 @@
                 . the policy evaluation tries to calculate the average value using the policy over all actions, while this value iteration greedly selects the action that will return the highest state-action value
                     -> maximum over all actions instead of doing the sum of the probability weighted actions 
 
-            -> this will yield the optimal v*(s)
+            ->>> this will yield the optimal v*(s)
 
         . having calculated v*, π* is just a greedy policy of the hightes state-action value per state
             π*(s) = argmax_a(sum_s',r(p[s',r|s,a] * (r + γv*(s'))))
@@ -56,7 +67,10 @@
 
 
  
-
+    NOTE::-> Applying this ideas to RL (model-free, or environment too high dimensional that we cant compute this value estimations)
+             -> consider simple state-transitions gotten by sampling instead of all the possible state-action transictions
+                . Model free
+                . Breaks curse of dimensionality, as we dont evaluate all possible s,s' combinations, just the sampled ones <S, A, R, S'>
     
 
 
