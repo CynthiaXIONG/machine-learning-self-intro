@@ -1,0 +1,125 @@
+--- finite MDP - Markov Decision Processes ---
+
+    - MDP
+        . classical formalization of sequential decision making -> decribe and environment for RL
+            . environment is fully observable
+            . current state completly characterises the process
+                -> Markov Property (recap): THe future is independent of the past given the present
+                    . what happens next depends only on the current state and not on the earlier states
+                    . current state capture all the useful information from the history
+
+        . A Markov Process/Chain is a sequence of random States with the Markov Property
+            . is a tuple (S, P)  -> S:states, P:transition probabilities that characterises how to transition from one state to the next
+
+        . in a markov decision process, the probabilitry for each possible value of St and Rt depends only on the immediate preceding state and action, St-1 and At-1
+            p(s', r | s, a)   -> dynamics of the MDP  (prob of new state and reward, condictioned by the current state and action chosen)
+
+        . need to tradeoff between immediate and delayed reward
+        . value is action but also state dependent -> q(s,a)
+
+
+    - Expected Return, Gt
+        . cumulative rewards received in the long Return
+
+        Gt = sum(Rt_1) -> simplistic approach
+
+        Discounted Return:
+
+        Gt = sum(γ^k*Rt+k+1),  γ -> discount rate, weighted average
+            . give more weight to the recent rewards
+            . similar to Exponential Recency-weighted Average
+
+            
+            γ = 0, only care about immediate reward, and not about the future
+            γ = 1, the most farsighted vision....care for all future rewards  -> Undiscounted
+                . not so good because there is more uncertainty in the future (agent doens not have perfect model of the environment so cant trust it fully)
+                . mathematically convienent (so you dont have infinty chains or calculate over big number of future rewards)
+                -> γ should be > 0 and < 1
+
+        
+        - Markov Reward Process
+            . is a Markov chain with "values" -> tuple (S,P,R,γ)
+
+    
+    - Continuing Tasks
+        . agent-environment interaction does not naturally break donw into a sequence of seperate episodes (episodic task)
+        
+    
+
+    - Bellman equation for MRPs
+        -> the value function can be decompsed into 2 parts:
+            . immediate REWARD: R_t+1
+            . discounted VALUE of successor states: γv(S_t+1)
+
+            v(s) = E[R_t+1 + γv(S_t+1) | S_t = s]
+
+    - Markov Decision Process (MDP)
+        . is a Markov reward process with decisions.
+        . tuple (S, A, P, R, γ)
+        . next state (the state transition matrix) is a function/dependent on the action (diff probs of ending up in different states if different actions are chosen)
+        . reward is a function of current state and action chosen R(a,s) = E[R_t+1 | S_t=s, A_t=a]        
+
+    - Policies and Value Functions -
+        . value estimating functions - functions of states or state-action pairs that estimate how good it is for the agen to be in a given state and perform a certain action
+        . distribution over actions given states (mapping from current state to probablity of chosing avialable actions)
+            . probability -> stocastic -> nice for exploration!
+
+        -Policy, π: mapping from states to probablilities of selecting each possible action
+            . π(a|s) -> prob of selecting a, when in s
+                -> stationary (time-independent), not a function of the current time-step
+            
+            . vπ(s) -> state-value function: value function of state s under policy π (sum of all action-state pairs probs * expected return)
+                . expected return starting from state s and the following policy π
+
+            . qπ(s,a) -> action-value function: value of taking action a in state s under policy π
+                . expected return starting from state s, taking action a and the following policy π  (how much future reward I will get after selecting this particular action)
+
+                - Bellman equation for vπ:
+                    vπ(s) = sum_a(π(a|s)) * sum_s',r(p(s',r|s,a) * (r+γvπ(s')))
+                        . same decomposition, immediate reward plus disconted value of successor state
+
+                    . sum over all values of the three variables a, s', r -> for each triple we compute its probability, weight the quatity and sum over all posibilities to get an expected value
+                        . averages over all the possibilities, weighting each by its probability of occuring (given by the policy π)
+                    . expresses the relationship between the value of a state and the values of its successor states -> looking ahead to its possible successor states
+
+            Monte Carlos Methods, allow estimation by experience of the values vπ (keeping average for each state of the actual returns) and qπ (seperate average for each action-state returns)
+                . averaging over many random samples of actual returns -> converges to the real value as experiences approach infinity
+
+            . keeping track of many state and actions might not be practical (if their spaces are very big), so vπ and qπ could be estimated using parameterized functions (with less parameters than states/actions)
+                -> bases for DeepRL
+
+        
+        - Optimal Policies and Optimal Value Functions -
+            . defining an optimal policy:
+                . a policy π is defined to be better than π' if its expected return is greater or equal for all states 
+                    .π1 bettter than π2 if v_π1(s) >= v_π2(s)
+
+                - optimal state-value function: v*(s) = max_π vπ(s)
+                    . maximum value function over all policies
+
+                . optimal policies also share the same optimal action-value function q*
+                    - optimal action-value function: q*(s,a) = max_π qπ(s,a)
+                        . if we find the q*, then we have solved the MDP has just chosing the action that yields the max q from q*
+
+                    . for the state-action pair (s,a), its optimal value results then following the optimal policy
+
+            -> Bellman Optimality Equation
+                for v*:
+                    v*(s) = max_a (q*(s,a))
+                        . pick the action that yields the maximum q for each state
+
+                        because: q*(s,a) = R(s,a) + γ*sum_s(P(a,s,s') * v*(s')) (reward + estimated average reward)
+
+                    v*(s) = max_a (R(s,a) + γ*sum_s(P(a,s,s') * v*(s')))
+
+                        -> this equation is non-linear (the max term...), no closed form solution
+                            . solved using iterative soltions:
+                                . Value Iteration
+                                . Policy Iteration
+                                . Q-learning
+                                . Sarsa
+
+                
+
+
+
